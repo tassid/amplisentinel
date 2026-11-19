@@ -24,6 +24,7 @@ from . import (
     listen,
     measure,
     merge,
+    ml,
     publish,
     reconcile,
 )
@@ -299,6 +300,59 @@ def cmd_between(args) -> int:
     return 0
 
 
+def cmd_export(args) -> int:
+    ws = _ws(args)
+    try:
+        res = ml.export_features(ws, qza_path=Path(args.qza), table_path=Path(args.table))
+    except ml.MLRefused as exc:
+        print(f"recusado: {exc}", file=sys.stderr)
+        return 2
+    print(f"uuid={res['source_qza']['uuid']}")
+    print(f"{res['tsv']['path']}  sha256={res['tsv']['sha256'][:16]}")
+    print(f"{res['parquet']['path']}  sha256={res['parquet']['sha256'][:16]}")
+    return 0
+
+
+def cmd_folds(args) -> int:
+    ws = _ws(args)
+    try:
+        res = ml.build_folds(
+            ws,
+            metadata_path=Path(args.metadata),
+            study_col=args.study_col,
+            target_col=args.target_col,
+        )
+    except ml.MLRefused as exc:
+        print(f"recusado: {exc}", file=sys.stderr)
+        return 2
+    for f in res["folds"]:
+        print(
+            f"fold {f['fold']} ({f['test_project']}): "
+            f"train={f['train_class_counts']}  test={f['test_class_counts']}"
+        )
+    print(f"{res['folds_file']['path']}  sha256={res['folds_file']['sha256'][:16]}")
+    return 0
+
+
+def cmd_train(args) -> int:
+    ws = _ws(args)
+    try:
+        res = ml.train_models(
+            ws,
+            metadata_path=Path(args.metadata),
+            config_path=Path(args.config) if args.config else None,
+        )
+    except ml.MLRefused as exc:
+        print(f"recusado: {exc}", file=sys.stderr)
+        return 2
+    print(
+        f"seed={res['seed']}  qza_uuid={res['source_qza_uuid']}  "
+        f"lopo_acc={res['metrics']['lopo_accuracy_mean']:.4f}"
+    )
+    print(f"shap: {res['artifacts']['shap_values']['path']}  sha256={res['artifacts']['shap_values']['sha256'][:16]}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="sentinel", description=__doc__)
     p.add_argument("--version", action="version", version=__version__)
@@ -390,6 +444,22 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--seed", type=int, default=42)
     s.add_argument("--metric", default="braycurtis")
     s.set_defaults(func=cmd_between)
+
+    s = sub.add_parser("export", help="exporta tabela para TSV/Parquet gravando UUID do .qza")
+    s.add_argument("--qza", required=True)
+    s.add_argument("--table", required=True)
+    s.set_defaults(func=cmd_export)
+
+    s = sub.add_parser("folds", help="gera folds leave-one-project-out determinísticos")
+    s.add_argument("--metadata", required=True)
+    s.add_argument("--study-col", default="study")
+    s.add_argument("--target-col", default="diagnosis")
+    s.set_defaults(func=cmd_folds)
+
+    s = sub.add_parser("train", help="registra Random Forest, t-SNE e SHAP no MLflow via config/ml.yaml")
+    s.add_argument("--metadata", required=True)
+    s.add_argument("--config")
+    s.set_defaults(func=cmd_train)
 
     s = sub.add_parser("verify", help="confere a cadeia de hashes do ledger")
     s.set_defaults(func=cmd_verify)
