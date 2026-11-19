@@ -79,6 +79,26 @@ def build_server(ws: Workspace):
     def errors(run: str | None = None) -> dict[str, Any]:
         return guarded(q.errors, run)
 
+    @server.tool(annotations=ro, description="ENA x Google Drive reconciliation rows, optionally filtered by run.")
+    def reconciliation(run: str | None = None) -> dict[str, Any]:
+        return guarded(q.reconciliation, run)
+
+    @server.tool(annotations=ro, description="Verified FASTQ fetch manifest of one sequencing run.")
+    def fetch_manifest(run: str) -> dict[str, Any]:
+        return guarded(q.fetch_manifest, run)
+
+    @server.tool(annotations=ro, description="Nextflow weblog process events (started, completed, failed) of one run.")
+    def process_events(run: str) -> dict[str, Any]:
+        return guarded(q.process_events, run)
+
+    @server.tool(annotations=ro, description="Between-project PERMANOVA metrics (R2, pseudo-F, p-value, seed).")
+    def between_metrics() -> dict[str, Any]:
+        return q.between_metrics(ws)
+
+    @server.tool(annotations=ro, description="Deterministic leave-one-project-out ML cross-validation folds.")
+    def folds() -> dict[str, Any]:
+        return q.folds(ws)
+
     return server
 
 

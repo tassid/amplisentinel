@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>org.amplisentinel.mcp.PROJECT_NAME</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/path/to/conda/envs/sentinel/bin/sentinel</string>
+    <string>-w</string>
+    <string>/Users/USER/pesquisa/PROJECT_NAME</string>
+    <string>mcp</string>
+    <string>--http</string>
+    <string>--host</string>
+    <string>127.0.0.1</string>
+    <string>--port</string>
+    <string>8701</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/USER/pesquisa/PROJECT_NAME/.sentinel/logs/mcp.stdout.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/USER/pesquisa/PROJECT_NAME/.sentinel/logs/mcp.stderr.log</string>
+</dict>
+</plist>

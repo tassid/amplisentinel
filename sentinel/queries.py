@@ -133,3 +133,45 @@ def errors(ws: Workspace, run: str | None = None) -> dict:
             continue
         out.append(e)
     return {"workspace": ws.name, "run": run, "errors": out, "source": _source(ws.ledger.path)}
+
+
+def reconciliation(ws: Workspace, run: str | None = None) -> dict:
+    if run is not None:
+        _check_run(ws, run)
+    path = ws.inventory_dir / "reconciliation.tsv"
+    rows: list[dict] = []
+    if path.exists():
+        with path.open(encoding="utf-8") as fh:
+            rows = list(csv.DictReader(fh, delimiter="\t"))
+    if run is not None:
+        rows = [r for r in rows if r.get("run") == run]
+    return {"workspace": ws.name, "run": run, "rows": rows, "source": _source(path)}
+
+
+def fetch_manifest(ws: Workspace, run: str) -> dict:
+    _check_run(ws, run)
+    path = ws.root / "runs" / run / "fetch_manifest.json"
+    data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+    return {"workspace": ws.name, "run": run, "manifest": data, "source": _source(path)}
+
+
+def process_events(ws: Workspace, run: str) -> dict:
+    _check_run(ws, run)
+    wanted = {"process_started", "process_completed", "process_failed"}
+    events = [
+        e for e in ws.ledger.entries()
+        if e.get("event") in wanted and (e.get("data") or {}).get("run") == run
+    ]
+    return {"workspace": ws.name, "run": run, "events": events, "source": _source(ws.ledger.path)}
+
+
+def between_metrics(ws: Workspace) -> dict:
+    path = ws.metrics_dir / "between.json"
+    data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+    return {"workspace": ws.name, "between": data, "source": _source(path)}
+
+
+def folds(ws: Workspace) -> dict:
+    path = ws.home / "ml" / "folds.json"
+    data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+    return {"workspace": ws.name, "folds": data, "source": _source(path)}

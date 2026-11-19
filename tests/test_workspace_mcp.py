@@ -66,9 +66,15 @@ def test_mcp_tools_are_read_only_and_scoped(tmp_path):
         assert names == {
             "workspace", "status", "run_detail", "run_metrics",
             "inventory", "ledger_tail", "ledger_verify", "errors",
+            "reconciliation", "fetch_manifest", "process_events",
+            "between_metrics", "folds",
         }
+        forbidden_param_names = ("path", "file", "dir", "folder")
         for t in tools:
-            assert "path" not in json.dumps(t.input_schema).lower()
+            assert t.annotations is not None and t.annotations.read_only_hint is True
+            props = (t.input_schema or {}).get("properties") or {}
+            for pname in props:
+                assert not any(bad in pname.lower() for bad in forbidden_param_names)
         return await server.call_tool("status", {})
 
     result = asyncio.run(go())
