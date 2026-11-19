@@ -14,7 +14,7 @@ import json
 import os
 import sys
 
-from . import __version__, reconcile
+from . import __version__, fetch, reconcile
 from . import inventory as inv
 from . import queries as q
 from .ext import ToolError
@@ -96,6 +96,23 @@ def cmd_inventory(args) -> int:
     return 0
 
 
+def cmd_fetch(args) -> int:
+    ws = _ws(args)
+    try:
+        res = fetch.run_fetch(ws, args.run, via=args.via, source=args.source)
+    except fetch.FetchRefused as exc:
+        print(f"recusado: {exc}", file=sys.stderr)
+        return 2
+    print(f"{ws.name}/{res['run']} -> {res['state']}")
+    print(f"arquivos: {res['files']}  MD5 igual ao ENA: {res['equal']}")
+    for p in res["problems"]:
+        where = p.get("file") or p.get("accession") or res["run"]
+        log = f"  log: {p['log']['path']}" if p.get("log") else ""
+        print(f"  {where}: {p['reason']}{log}")
+    print(f"{res['manifest']['path']}  sha256={res['manifest']['sha256'][:16]}")
+    return 0 if res["state"] == "MD5_OK" else 1
+
+
 def cmd_verify(args) -> int:
     data = q.ledger_verify(_ws(args))
     if data["ok"]:
@@ -167,6 +184,14 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("inventory", help="accessions x ENA")
     s.add_argument("--drive", action="store_true", help="também cruza com o Drive (rclone, sem download)")
     s.set_defaults(func=cmd_inventory)
+
+    s = sub.add_parser("fetch", help="baixa os FASTQ de uma corrida e confere o MD5 do ENA")
+    s.add_argument("run")
+    s.add_argument("--via", choices=["direct", "fetchngs"], default="direct",
+                   help="direct: rclone/HTTPS (padrão); fetchngs: nf-core/fetchngs travado")
+    s.add_argument("--source", choices=["auto", "drive", "ena"], default="auto",
+                   help="auto: Drive quando o arquivo está lá, senão ENA")
+    s.set_defaults(func=cmd_fetch)
 
     s = sub.add_parser("verify", help="confere a cadeia de hashes do ledger")
     s.set_defaults(func=cmd_verify)

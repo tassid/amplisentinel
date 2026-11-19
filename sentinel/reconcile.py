@@ -41,6 +41,7 @@ COLUMNS = [
 class DriveFile:
     name: str
     md5: str
+    path: str = ""
 
 
 def _split(value: str | None) -> list[str]:
@@ -83,14 +84,16 @@ def parse_listing(stdout: bytes) -> list[DriveFile]:
         if item.get("IsDir"):
             continue
         md5 = (item.get("Hashes") or {}).get("md5") or ""
-        files.append(DriveFile(name=item["Name"], md5=md5.lower()))
+        files.append(DriveFile(name=item["Name"], md5=md5.lower(), path=item.get("Path") or item["Name"]))
     return files
 
 
-def list_drive(ws: Workspace, drive_path: str, runner: Runner) -> tuple[list[DriveFile], CallRecord]:
+def list_drive(
+    ws: Workspace, drive_path: str, runner: Runner, context: dict | None = None
+) -> tuple[list[DriveFile], CallRecord]:
     """List a Drive folder with hashes. Nothing is downloaded."""
     argv = ["rclone", "lsjson", "--hash", "--recursive", f"{DRIVE_REMOTE}:{drive_path}"]
-    record = call(ws, argv, version_argv=["rclone", "version"], runner=runner)
+    record = call(ws, argv, version_argv=["rclone", "version"], runner=runner, context=context)
     try:
         files = parse_listing(record.stdout)
     except (json.JSONDecodeError, KeyError, TypeError) as exc:
@@ -152,7 +155,7 @@ def build(
     for name, cfg in runs.items():
         drive_files: list[DriveFile] | None = None
         if cfg.drive_path:
-            drive_files, record = list_drive(ws, cfg.drive_path, runner)
+            drive_files, record = list_drive(ws, cfg.drive_path, runner, context={"run": name})
             drive_logs[name] = {
                 "drive_path": cfg.drive_path,
                 "stdout": {"path": record.stdout_path, "sha256": record.stdout_sha256},

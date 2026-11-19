@@ -20,7 +20,11 @@ documented here when their stage lands.
 | `inventory_built` | `sentinel inventory` | `projects`, `accessions`, `not_found`, `files` (path to sha256) |
 | `reconciliation_built` | `sentinel inventory --drive` | `runs`, `accessions`, `files`, `present_in_drive`, `equal`, `runs_without_drive_path`, `drive_listings` (per run: `drive_path`, `stdout` path and sha256, `version`), `output` (path and sha256 of `reconciliation.tsv`), `ena_cache` (path and sha256) |
 | `tool_call` | any external tool, through `sentinel/ext/` | `command` (exact argv), `tool`, `version` (first line of `<tool> version`), `exit_code`, `stdout` and `stderr` (path and sha256) |
-| `error` | an external tool that exits non-zero | `tool`, `command`, `exit_code`, `stderr` (path and sha256). The text is in that file, byte for byte |
+| `error` | an external tool that exits non-zero | `tool`, `command`, `exit_code`, `stderr` (path and sha256), plus `run` when the call belongs to a run. The text is in that file, byte for byte |
+| `error` | `sentinel fetch` | `run`, `stage: fetch`, and either `files` (list of `accession`, `file`, `reason`, optional `log` path and sha256), `reason: espaço em disco` with the disk fields of `fetch_started`, or `reason: metadados do ENA` with `log` |
+| `fetch_started` | `sentinel fetch` | `run`, `via` (`direct` or `fetchngs`), `source` (`auto`, `drive`, `ena`), `files`, `fastq_dir`, `resumed`, `bytes_total`, `bytes_remaining`, `disk_slack`, `disk_required`, `disk_free` |
+| `file_verified` | `sentinel fetch` | `run`, `file`, `source` (`drive`, `ena`, `fetchngs`, `local`), `bytes`, `md5_expected` (ENA), `md5_obtained`, `equal` |
+| `fetch_completed` | `sentinel fetch` | `run`, `manifest` (path and sha256 of `fetch_manifest.json`), `files`, `equal`, `result` (`MD5_OK` or `BLOCKED`) |
 
 ## Notes
 
@@ -31,3 +35,22 @@ documented here when their stage lands.
   `yes`, `no`, or `not_checked` (the run has no `drive_path` in `runs.yaml`).
   `equal` is `yes` only when exactly one file with that name is on Drive and its
   MD5 equals the ENA MD5.
+
+## fetch
+
+- FASTQ files go to `<workspace>/runs/<RUN>/fastq/`. ENA downloads are written
+  to `<file>.part` and renamed when the transfer ends; a later `fetch` continues
+  the `.part` file with an HTTP Range request.
+- `fetch_manifest.json` (in `runs/<RUN>/`) lists, per file: `file`, `accession`,
+  `source`, `location`, `bytes_expected`, `bytes`, `md5_expected`, `md5_obtained`,
+  `equal`; and the `problems` that led to `BLOCKED`.
+- `source: local` means the file was already in `fastq/` and was checked as it
+  is. Fetch never deletes or overwrites a file.
+
+## sentinel.yaml keys read by fetch
+
+| Key | Meaning |
+|---|---|
+| `fetch.disk_slack` | free space needed = bytes still to download x this factor (default 1.2, must be >= 1) |
+| `fetch.fetchngs_release` | nf-core/fetchngs release for `--via fetchngs`; required for that option |
+| `container_engine` | `docker` (default) or `podman`, passed as `-profile` |

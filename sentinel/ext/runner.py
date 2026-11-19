@@ -46,6 +46,20 @@ Runner = Callable[[list[str]], CallResult]
 class ToolError(Exception):
     """An external tool failed. Its literal stderr is in the saved log file."""
 
+    def __init__(self, message: str, log: dict | None = None):
+        super().__init__(message)
+        self.log = log
+
+
+def save_log(ws: Workspace, label: str, data: bytes) -> dict:
+    """Save bytes under .sentinel/logs/ and return {"path", "sha256"}."""
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    log_dir = ws.home / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    path = log_dir / f"{stamp}-{label}"
+    path.write_bytes(data)
+    return {"path": str(path), "sha256": hashlib.sha256(data).hexdigest()}
+
 
 def subprocess_runner(argv: list[str]) -> CallResult:
     """Run a real command. A missing executable is reported as exit code 127."""
@@ -75,12 +89,15 @@ def call(
     *,
     version_argv: list[str],
     runner: Runner = subprocess_runner,
+    context: dict | None = None,
 ) -> CallRecord:
     """Run one external command, log it, and return its record.
 
     Raises ToolError when the exit code is not zero. The ledger keeps both the
-    `tool_call` and the `error` event in that case.
+    `tool_call` and the `error` event in that case. `context` (for example
+    {"run": "P1"}) is added to both events.
     """
+    ctx = dict(context or {})
     tool = argv[0]
     version = tool_version(version_argv, runner)
     res = runner(argv)
@@ -106,6 +123,7 @@ def call(
     ws.ledger.append(
         "tool_call",
         {
+            **ctx,
             "command": argv,
             "tool": tool,
             "version": version,
@@ -118,6 +136,7 @@ def call(
         ws.ledger.append(
             "error",
             {
+                **ctx,
                 "tool": tool,
                 "command": argv,
                 "exit_code": res.returncode,
@@ -126,6 +145,7 @@ def call(
         )
         raise ToolError(
             f"{tool} saiu com código {res.returncode}; "
-            f"stderr literal em {record.stderr_path} (sha256 {record.stderr_sha256})"
+            f"stderr literal em {record.stderr_path} (sha256 {record.stderr_sha256})",
+            log={"path": record.stderr_path, "sha256": record.stderr_sha256},
         )
     return record
