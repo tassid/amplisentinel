@@ -1,0 +1,19 @@
+{
+  "title": "Sentinel: auditable experiment manager for multi-run amplicon processing",
+  "upload_type": "software",
+  "license": "BSD-3-Clause",
+  "creators": [
+    {
+      "name": "Anzolin, Tassiane"
+    }
+  ],
+  "keywords": [
+    "16S rRNA",
+    "amplicon",
+    "microbiome",
+    "QIIME 2",
+    "DADA2",
+    "Nextflow",
+    "reproducibility"
+  ]
+}
