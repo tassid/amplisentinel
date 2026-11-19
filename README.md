@@ -48,8 +48,8 @@ move to the next. Sentinel makes that loop reproducible and auditable:
 | Drive reconciliation (ENA MD5 × rclone listing, no download) | working |
 | External tool layer (`sentinel/ext/`, logs every call) | working |
 | fetch (Drive via rclone, ENA HTTPS with resume, optional nf-core/fetchngs, MD5) | working |
-| run (Nextflow + ampliseq per run) | next |
-| measure (DADA2 stats, cutadapt, depth, PERMANOVA) | planned |
+| run (Nextflow + nf-core/ampliseq 3.1.0 per run) | working |
+| measure (DADA2 stats, cutadapt, depth, PERMANOVA) | next |
 | publish / clean (Drive, DVC, MLflow) | planned |
 | Workspaces (one per research project) | working |
 | MCP server (read only, locked to one workspace, stdio or HTTP) | working |
@@ -77,6 +77,7 @@ sentinel init            # registers runs from config/runs.yaml
 sentinel inventory       # data/accessions/*_runs.txt × ENA → .sentinel/inventory/
 sentinel inventory --drive   # also × Google Drive (rclone lsjson, nothing downloaded)
 sentinel fetch P1        # FASTQ of one run → runs/P1/fastq/, MD5 checked against ENA
+sentinel run P1          # nf-core/ampliseq 3.1.0 via Nextflow for one run
 sentinel status
 sentinel verify
 sentinel show run P14    # JSON, the same data the MCP server returns

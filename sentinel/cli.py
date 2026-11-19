@@ -17,6 +17,7 @@ import sys
 from . import __version__, fetch, reconcile
 from . import inventory as inv
 from . import queries as q
+from . import run as run_worker
 from .ext import ToolError
 from .runs import ConfigError
 from .state import TransitionError
@@ -113,6 +114,23 @@ def cmd_fetch(args) -> int:
     return 0 if res["state"] == "MD5_OK" else 1
 
 
+def cmd_run(args) -> int:
+    ws = _ws(args)
+    try:
+        res = run_worker.run_ampliseq(ws, args.run, weblog_port=args.weblog_port)
+    except run_worker.RunRefused as exc:
+        print(f"recusado: {exc}", file=sys.stderr)
+        return 2
+    print(f"{ws.name}/{res['run']} -> {res['state']}")
+    print(f"amostras: {res['samples']}")
+    print(f"samplesheet: {res['samplesheet']['path']}  sha256={res['samplesheet']['sha256'][:16]}")
+    print(f"params: {res['params']['path']}  sha256={res['params']['sha256'][:16]}")
+    if res.get("error_log"):
+        print(f"erro literal: {res['error_log']['path']}  sha256={res['error_log']['sha256'][:16]}")
+    print(f"{res['manifest']['path']}  sha256={res['manifest']['sha256'][:16]}")
+    return 0 if res["state"] == "PROCESSING" else 1
+
+
 def cmd_verify(args) -> int:
     data = q.ledger_verify(_ws(args))
     if data["ok"]:
@@ -192,6 +210,12 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--source", choices=["auto", "drive", "ena"], default="auto",
                    help="auto: Drive quando o arquivo está lá, senão ENA")
     s.set_defaults(func=cmd_fetch)
+
+    s = sub.add_parser("run", help="executa nf-core/ampliseq para uma corrida")
+    s.add_argument("run")
+    s.add_argument("--weblog-port", type=int, default=None,
+                   help="porta local de -with-weblog (padrão: sentinel.yaml ou 8765)")
+    s.set_defaults(func=cmd_run)
 
     s = sub.add_parser("verify", help="confere a cadeia de hashes do ledger")
     s.set_defaults(func=cmd_verify)
