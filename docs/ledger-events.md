@@ -36,6 +36,7 @@ documented here when their stage lands.
 | `published` | `sentinel publish` | `run`, `remote_root`, `files`, `manifest` (path and sha256 of `publish_manifest.json`), `dvc`, `mlflow` |
 | `cleaned` | `sentinel clean` | `run`, `deleted_count`, `deleted_files` (`path`, `bytes`, `md5`, `sha256`), `manifest` (path and sha256 of `clean_manifest.json`) |
 | `merge` | `sentinel merge` | `run` (`merge`), `runs`, `regions_by_run`, `strategy`, `qiime2_image`, `silva_classifier` (`path`, `md5`, `sha256`), `artifacts` (including `replay_supplement`), `manifest` (path and sha256) |
+| `between_metrics` | `sentinel between` | `run` (`between`), `seed`, `permutations`, `metric`, `sources` (`input`, `metadata`), `results` (`study`, `diagnosis` with `R2`, `pseudo_F`, `p_value`), `output` (path and sha256 of `.sentinel/metrics/between.json`) |
 
 ## Notes
 

@@ -52,7 +52,8 @@ move to the next. Sentinel makes that loop reproducible and auditable:
 | measure (DADA2 stats, cutadapt, depth, MultiQC, rules) | working |
 | publish / clean (Drive, DVC, MLflow) | working |
 | merge (QIIME 2 merge, SILVA by MD5, replay-supplement) | working |
-| between (PERMANOVA with scikit-bio) | next |
+| between (PERMANOVA with scikit-bio) | working |
+| ML bridge (export, LOPO folds, Random Forest, SHAP, MLflow) | next |
 | Workspaces (one per research project) | working |
 | MCP server (read only, locked to one workspace, stdio or HTTP) | working |
 
