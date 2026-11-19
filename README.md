@@ -51,7 +51,8 @@ move to the next. Sentinel makes that loop reproducible and auditable:
 | run (Nextflow + nf-core/ampliseq 3.1.0 per run) | working |
 | measure (DADA2 stats, cutadapt, depth, MultiQC, rules) | working |
 | publish / clean (Drive, DVC, MLflow) | working |
-| merge (QIIME 2 merge, SILVA by MD5, replay-supplement) | next |
+| merge (QIIME 2 merge, SILVA by MD5, replay-supplement) | working |
+| between (PERMANOVA with scikit-bio) | next |
 | Workspaces (one per research project) | working |
 | MCP server (read only, locked to one workspace, stdio or HTTP) | working |
 

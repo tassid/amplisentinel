@@ -35,6 +35,7 @@ documented here when their stage lands.
 | `decontam_recorded` | `sentinel decontam` | `run`, `image`, `method`, `threshold`, `negative_controls`, `table_before` and `table_after` (path and sha256), `flagged_asvs` (`asv_id`, `score`), `manifest` (path and sha256) |
 | `published` | `sentinel publish` | `run`, `remote_root`, `files`, `manifest` (path and sha256 of `publish_manifest.json`), `dvc`, `mlflow` |
 | `cleaned` | `sentinel clean` | `run`, `deleted_count`, `deleted_files` (`path`, `bytes`, `md5`, `sha256`), `manifest` (path and sha256 of `clean_manifest.json`) |
+| `merge` | `sentinel merge` | `run` (`merge`), `runs`, `regions_by_run`, `strategy`, `qiime2_image`, `silva_classifier` (`path`, `md5`, `sha256`), `artifacts` (including `replay_supplement`), `manifest` (path and sha256) |
 
 ## Notes
 
