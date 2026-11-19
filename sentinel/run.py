@@ -37,13 +37,14 @@ from pathlib import Path
 import yaml
 
 from . import inventory as inv
+from .common import log_mlflow_run
 from .ext import Runner, ToolError, call, subprocess_runner
 from .runs import ConfigError, RunConfig
 from .workspace import Workspace
 
 DEFAULT_AMPLISEQ_RELEASE = "3.1.0"
 DEFAULT_WEBLOG_PORT = 8765
-RUN_SETTINGS_KEYS = ("ampliseq_release", "weblog_port")
+RUN_SETTINGS_KEYS = ("ampliseq_release", "weblog_port", "qiime2_image")
 ENGINES = ("docker", "podman")
 SAMPLE_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]+$")
 PAIR1_RE = re.compile(r"_1\.f(ast)?q\.gz$")
@@ -619,6 +620,23 @@ def run_ampliseq(
         "images": final_images,
         "artifacts": {k: v for k, v in artifacts.items() if v is not None},
     }
+    mlflow_info = log_mlflow_run(
+        ws,
+        run_name=f"{run}-dada2-{stamp}",
+        params={
+            "denoiser": "dada2",
+            "ampliseq_release": cfg.ampliseq_release,
+            "container_engine": cfg.container_engine,
+            "region": rc.region or "",
+            "primer_fwd": rc.primers.forward or "",
+            "primer_rev": rc.primers.reverse or "",
+        },
+        metrics={"samples": float(len(rows))},
+        tags={"run": run, "denoiser": "dada2"},
+        artifacts=[samplesheet_path, params_path],
+    )
+    if mlflow_info is not None:
+        manifest["mlflow"] = mlflow_info
     m_sha = _write_json_atomic(manifest_path, manifest)
     ws.ledger.append(
         "run_completed",
