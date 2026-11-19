@@ -44,6 +44,9 @@ move to the next. Sentinel makes that loop reproducible and auditable:
 | Ledger (hash chain, verify) | working |
 | Run state machine | working |
 | Inventory (accession lists × ENA metadata) | working |
+| Runs config (`runs.yaml`, unknown keys refused) | working |
+| Drive reconciliation (ENA MD5 × rclone listing, no download) | working |
+| External tool layer (`sentinel/ext/`, logs every call) | working |
 | fetch (rclone, ENA, MD5) | next |
 | run (Nextflow + ampliseq per run) | planned |
 | measure (DADA2 stats, cutadapt, depth, PERMANOVA) | planned |
@@ -72,6 +75,7 @@ pip install -e ".[mcp]"
 export SENTINEL_WORKSPACE=workspaces/cervical-cancer   # or: sentinel -w <path> ...
 sentinel init            # registers runs from config/runs.yaml
 sentinel inventory       # data/accessions/*_runs.txt × ENA → .sentinel/inventory/
+sentinel inventory --drive   # also × Google Drive (rclone lsjson, nothing downloaded)
 sentinel status
 sentinel verify
 sentinel show run P14    # JSON, the same data the MCP server returns
@@ -97,7 +101,7 @@ Moving a run and recording a decision:
 sentinel move P1 FETCHING
 sentinel move P1 BLOCKED
 sentinel move P1 FETCHING -j "MD5 mismatch traced to an interrupted download; file fetched again"
-sentinel decide P1 "Truncation 240/200 based on the quality profile in demux.qzv"
+sentinel decide P1 "<decision text typed by the researcher>"
 ```
 
 ## Data in this repository

@@ -22,8 +22,8 @@ import re
 import urllib.parse
 import urllib.request
 from collections import defaultdict
+from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Callable, Iterable
 
 ENA_SEARCH = "https://www.ebi.ac.uk/ena/portal/api/search"
 ENA_FIELDS = [
@@ -48,17 +48,22 @@ BATCH = 100
 Fetcher = Callable[[list[str]], list[dict]]
 
 
+def read_accessions(path: Path) -> list[str]:
+    """Accessions in one list file, one per line. Other lines are ignored."""
+    accs = []
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        token = line.strip()
+        if token and ACCESSION_RE.match(token):
+            accs.append(token)
+    return accs
+
+
 def read_accession_lists(folder: Path) -> dict[str, list[str]]:
     """Return {project: [accessions]} from files named <PROJECT>_runs.txt."""
     projects: dict[str, list[str]] = {}
     for path in sorted(Path(folder).glob("*_runs.txt")):
         project = path.name[: -len("_runs.txt")]
-        accs = []
-        for line in path.read_text(encoding="utf-8").splitlines():
-            token = line.strip()
-            if token and ACCESSION_RE.match(token):
-                accs.append(token)
-        projects[project] = accs
+        projects[project] = read_accessions(path)
     return projects
 
 
@@ -182,6 +187,8 @@ def build(
                 "reads_total",
                 "fastq_files",
                 "fastq_gb",
+                "n_studies",
+                "n_library_layouts",
             ]
         )
         for project in projects:
@@ -199,6 +206,8 @@ def build(
                     s["reads"],
                     s["fastq_files"],
                     round(s["fastq_bytes"] / 1e9, 3),
+                    len([x for x in s["studies"] if x]),
+                    len([x for x in s["layouts"] if x]),
                 ]
             )
 

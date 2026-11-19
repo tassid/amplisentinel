@@ -23,6 +23,7 @@ from pathlib import Path
 import yaml
 
 from .ledger import Ledger
+from .runs import RunConfig, load_runs
 from .state import RunState
 
 TEMPLATE_RUNS = """# One entry per sequencing run. DADA2 learns one error model per entry.
@@ -42,14 +43,14 @@ class Workspace:
     root: Path
 
     @classmethod
-    def open(cls, path: str | Path) -> "Workspace":
+    def open(cls, path: str | Path) -> Workspace:
         root = Path(path).expanduser().resolve()
         if not (root / "sentinel.yaml").exists():
             raise WorkspaceError(f"não é um workspace do Sentinel (falta sentinel.yaml): {root}")
         return cls(root)
 
     @classmethod
-    def create(cls, path: str | Path, name: str, title: str | None = None) -> "Workspace":
+    def create(cls, path: str | Path, name: str, title: str | None = None) -> Workspace:
         root = Path(path).expanduser().resolve()
         if (root / "sentinel.yaml").exists():
             raise WorkspaceError(f"já existe um workspace em {root}")
@@ -105,11 +106,12 @@ class Workspace:
     def metrics_dir(self) -> Path:
         return self.home / "metrics"
 
+    def runs(self) -> dict[str, RunConfig]:
+        """Validated runs from config/runs.yaml. Raises ConfigError if the file is wrong."""
+        return load_runs(self.runs_file)
+
     def configured_runs(self) -> list[str]:
-        if not self.runs_file.exists():
-            return []
-        cfg = yaml.safe_load(self.runs_file.read_text(encoding="utf-8")) or {}
-        return list((cfg.get("runs") or {}).keys())
+        return list(self.runs().keys())
 
     def rules(self) -> dict:
         if not self.rules_file.exists():

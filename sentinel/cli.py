@@ -14,9 +14,11 @@ import json
 import os
 import sys
 
-from . import __version__
+from . import __version__, reconcile
 from . import inventory as inv
 from . import queries as q
+from .ext import ToolError
+from .runs import ConfigError
 from .state import TransitionError
 from .workspace import Workspace, WorkspaceError
 
@@ -82,6 +84,15 @@ def cmd_inventory(args) -> int:
     print(f"não encontrados no ENA: {summary['not_found']}")
     for path, digest in summary["files"].items():
         print(f"{path}  sha256={digest[:16]}")
+    if args.drive:
+        rec = reconcile.build(ws)
+        print(f"reconciliação (Drive {reconcile.DRIVE_REMOTE}, sem download):")
+        print(f"arquivos FASTQ esperados: {rec['files']}")
+        print(f"presentes no Drive: {rec['present_in_drive']}")
+        print(f"MD5 iguais ao ENA: {rec['equal']}")
+        if rec["runs_without_drive_path"]:
+            print(f"corridas sem drive_path (não consultadas): {', '.join(rec['runs_without_drive_path'])}")
+        print(f"{rec['output']['path']}  sha256={rec['output']['sha256'][:16]}")
     return 0
 
 
@@ -154,6 +165,7 @@ def main(argv: list[str] | None = None) -> int:
     s.set_defaults(func=cmd_decide)
 
     s = sub.add_parser("inventory", help="accessions x ENA")
+    s.add_argument("--drive", action="store_true", help="também cruza com o Drive (rclone, sem download)")
     s.set_defaults(func=cmd_inventory)
 
     s = sub.add_parser("verify", help="confere a cadeia de hashes do ledger")
@@ -173,7 +185,7 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
     try:
         return args.func(args)
-    except WorkspaceError as exc:
+    except (WorkspaceError, ConfigError, ToolError) as exc:
         print(f"erro: {exc}", file=sys.stderr)
         return 2
 
