@@ -55,7 +55,7 @@ move to the next. Sentinel makes that loop reproducible and auditable:
 | between (PERMANOVA with scikit-bio) | working |
 | ML bridge (export, LOPO folds, Random Forest, SHAP, MLflow) | working |
 | MCP server (read only, 13 tools, serve-all, launchd) | working |
-| report (deterministic static HTML report) | next |
+| report (deterministic static HTML report) | working |
 | Workspaces (one per research project) | working |
 | MCP server (read only, locked to one workspace, stdio or HTTP) | working |
 
