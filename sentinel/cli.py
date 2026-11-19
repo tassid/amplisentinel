@@ -14,7 +14,7 @@ import json
 import os
 import sys
 
-from . import __version__, deblur, fetch, reconcile
+from . import __version__, deblur, fetch, listen, reconcile
 from . import inventory as inv
 from . import queries as q
 from . import run as run_worker
@@ -176,6 +176,10 @@ def cmd_mcp(args) -> int:
     return 0
 
 
+def cmd_listen(args) -> int:
+    return listen.serve(_ws(args), port=args.port, default_run=args.run)
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="sentinel", description=__doc__)
     p.add_argument("--version", action="version", version=__version__)
@@ -231,6 +235,12 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--weblog-port", type=int, default=None,
                    help="porta local de -with-weblog (padrão: sentinel.yaml ou 8765)")
     s.set_defaults(func=cmd_run)
+
+    s = sub.add_parser("listen", help="escuta eventos -with-weblog do Nextflow em 127.0.0.1")
+    s.add_argument("--port", type=int, default=None,
+                   help="porta local (padrão: run.weblog_port ou 8765)")
+    s.add_argument("--run", default=None, help="nome da corrida quando não estiver nos parâmetros do evento")
+    s.set_defaults(func=cmd_listen)
 
     s = sub.add_parser("verify", help="confere a cadeia de hashes do ledger")
     s.set_defaults(func=cmd_verify)
