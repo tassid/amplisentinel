@@ -33,6 +33,8 @@ documented here when their stage lands.
 | `process_failed` | `sentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
 | `metrics_recorded` | `sentinel measure` | `run`, `metrics` (path and sha256 of `.sentinel/metrics/<RUN>.json`), `rules_source`, `result` (`MEASURED` or `BLOCKED`), `violations` |
 | `decontam_recorded` | `sentinel decontam` | `run`, `image`, `method`, `threshold`, `negative_controls`, `table_before` and `table_after` (path and sha256), `flagged_asvs` (`asv_id`, `score`), `manifest` (path and sha256) |
+| `published` | `sentinel publish` | `run`, `remote_root`, `files`, `manifest` (path and sha256 of `publish_manifest.json`), `dvc`, `mlflow` |
+| `cleaned` | `sentinel clean` | `run`, `deleted_count`, `deleted_files` (`path`, `bytes`, `md5`, `sha256`), `manifest` (path and sha256 of `clean_manifest.json`) |
 
 ## Notes
 
