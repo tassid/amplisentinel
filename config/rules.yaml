@@ -1,0 +1,14 @@
+# Thresholds written by the researcher. Sentinel compares values against them
+# and reports "below" / "above" / "within". It never suggests a value.
+# Leave the file empty to get raw numbers only.
+#
+# Example (commented out on purpose):
+#
+# dada2:
+#   filtered_pct_min: 50
+#   merged_pct_min: 70
+#   chimera_pct_max: 20
+# primers:
+#   found_pct_min: 80
+# depth:
+#   reads_per_sample_min: 1000

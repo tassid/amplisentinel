@@ -1,0 +1,10 @@
+.sentinel/
+work/
+results/
+*.fastq
+*.fastq.gz
+*.fq.gz
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.nextflow*

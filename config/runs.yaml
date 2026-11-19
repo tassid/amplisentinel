@@ -1,0 +1,45 @@
+# One entry per sequencing run. DADA2 learns one error model per entry.
+# A project split across sequencing runs gets one entry per run (for example
+# P10a and P10b). Fill `region` and `primers` from each study's methods.
+
+runs:
+  P1:
+    accessions: data/accessions/P1_runs.txt
+    region: null
+    primers: { forward: null, reverse: null }
+  P2:
+    accessions: data/accessions/P2_runs.txt
+    region: null
+    primers: { forward: null, reverse: null }
+  P6:
+    accessions: data/accessions/P6_runs.txt
+    region: null
+    primers: { forward: null, reverse: null }
+  P9:
+    accessions: data/accessions/P9_runs.txt
+    region: null
+    primers: { forward: null, reverse: null }
+  P10:
+    accessions: data/accessions/P10_runs.txt
+    region: null
+    primers: { forward: null, reverse: null }
+  P14:
+    accessions: data/accessions/P14_runs.txt
+    region: null
+    primers: { forward: null, reverse: null }
+  P16:
+    accessions: data/accessions/P16_runs.txt
+    region: null
+    primers: { forward: null, reverse: null }
+  P19:
+    accessions: data/accessions/P19_runs.txt
+    region: null
+    primers: { forward: null, reverse: null }
+  P21:
+    accessions: data/accessions/P21_runs.txt
+    region: null
+    primers: { forward: null, reverse: null }
+  P22:
+    accessions: data/accessions/P22_runs.txt
+    region: null
+    primers: { forward: null, reverse: null }
