@@ -31,6 +31,7 @@ documented here when their stage lands.
 | `process_started` | `sentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
 | `process_completed` | `sentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
 | `process_failed` | `sentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
+| `metrics_recorded` | `sentinel measure` | `run`, `metrics` (path and sha256 of `.sentinel/metrics/<RUN>.json`), `rules_source`, `result` (`MEASURED` or `BLOCKED`), `violations` |
 
 ## Notes
 
