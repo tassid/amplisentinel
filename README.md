@@ -101,7 +101,7 @@ Moving a run and recording a decision:
 sentinel move P1 FETCHING
 sentinel move P1 BLOCKED
 sentinel move P1 FETCHING -j "MD5 mismatch traced to an interrupted download; file fetched again"
-sentinel decide P1 "Truncation 240/200 based on the quality profile in demux.qzv"
+sentinel decide P1 "<decision text typed by the researcher>"
 ```
 
 ## Data in this repository
