@@ -25,7 +25,7 @@ move to the next. Sentinel makes that loop reproducible and auditable:
 ```
             researcher ── sentinel CLI ──┐
                                          │
-  Claude (MCP, read only, no opinions) ──┤
+  OpenBot / Claude (MCP, read only) ─────┤
                                          ▼
                               ┌──────── manager ────────┐
                               │ state machine · ledger  │
@@ -48,16 +48,47 @@ move to the next. Sentinel makes that loop reproducible and auditable:
 | run (Nextflow + ampliseq per run) | planned |
 | measure (DADA2 stats, cutadapt, depth, PERMANOVA) | planned |
 | publish / clean (Drive, DVC, MLflow) | planned |
-| MCP server (read only) | planned |
+| Workspaces (one per research project) | working |
+| MCP server (read only, locked to one workspace, stdio or HTTP) | working |
+
+## Workspaces: one per research project
+
+Each research project (cervical cancer, rice, coral, soybean, coffee) is a separate
+workspace with its own config, accession lists, ledger and state. Nothing is shared.
+
+```
+workspaces/cervical-cancer/
+  sentinel.yaml            name, title
+  config/runs.yaml         sequencing runs
+  config/rules.yaml        thresholds written by the researcher
+  data/accessions/         <STUDY>_runs.txt
+  .sentinel/               ledger, state, inventory, metrics (not committed)
+```
 
 ## Quick start
 
 ```bash
-pip install -e .
-sentinel init            # creates .sentinel/ and registers runs from config/runs.yaml
+pip install -e ".[mcp]"
+export SENTINEL_WORKSPACE=workspaces/cervical-cancer   # or: sentinel -w <path> ...
+sentinel init            # registers runs from config/runs.yaml
 sentinel inventory       # data/accessions/*_runs.txt × ENA → .sentinel/inventory/
 sentinel status
 sentinel verify
+sentinel show run P14    # JSON, the same data the MCP server returns
+```
+
+New project:
+
+```bash
+sentinel new ~/pesquisa/rice --name rice --title "Rice microbiome"
+```
+
+## Conversational interface (OpenBot)
+
+One read-only MCP server per project, one Bot per project. See [docs/openbot.md](docs/openbot.md).
+
+```bash
+sentinel -w workspaces/cervical-cancer mcp --http --port 8701
 ```
 
 Moving a run and recording a decision:
@@ -71,7 +102,7 @@ sentinel decide P1 "Truncation 240/200 based on the quality profile in demux.qzv
 
 ## Data in this repository
 
-`data/accessions/` holds the public run accessions (SRA/ENA) of 10 cervicovaginal microbiome
+`workspaces/cervical-cancer/data/accessions/` holds the public run accessions (SRA/ENA) of 10 cervicovaginal microbiome
 studies, 1,042 runs in total. Raw FASTQ files are never committed.
 
 ## Open source stack

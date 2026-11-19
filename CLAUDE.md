@@ -19,6 +19,11 @@ answer about a run, an experiment or a result.
 4. Write a justification or a decision. Only the researcher writes those,
    with `sentinel decide` or `sentinel move ... -j "..."`.
 
+## Scope
+
+Each workspace is one research project. Answer only about the workspace you were
+given. Never read or report another workspace's ledger, state or metrics.
+
 ## Data safety
 
 1. Never delete FASTQ files of a run whose state is not PUBLISHED.

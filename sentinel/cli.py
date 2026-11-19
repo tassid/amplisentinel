@@ -1,5 +1,8 @@
 """Command line interface.
 
+Every command acts on one workspace (one research project), chosen with
+--workspace, the SENTINEL_WORKSPACE variable, or the current folder.
+
 Output rule: every command prints data (values, states, file paths, hashes).
 No command prints recommendations.
 """
@@ -7,74 +10,74 @@ No command prints recommendations.
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import sys
-from pathlib import Path
-
-import yaml
 
 from . import __version__
 from . import inventory as inv
-from .ledger import Ledger
-from .state import RunState, TransitionError
-
-HOME = Path(".sentinel")
-
-
-def _ledger() -> Ledger:
-    return Ledger(HOME / "ledger.jsonl")
+from . import queries as q
+from .state import TransitionError
+from .workspace import Workspace, WorkspaceError
 
 
-def _state() -> RunState:
-    return RunState(HOME / "state.json", _ledger())
+def _ws(args) -> Workspace:
+    return Workspace.open(args.workspace)
+
+
+def cmd_new(args) -> int:
+    ws = Workspace.create(args.path, args.name, args.title)
+    ws.ledger.append("workspace_created", {"name": ws.name, "version": __version__})
+    print(f"workspace criado: {ws.root}")
+    return 0
 
 
 def cmd_init(args) -> int:
-    HOME.mkdir(exist_ok=True)
-    led = _ledger()
-    led.append("init", {"version": __version__})
-    runs_file = Path(args.runs)
-    if runs_file.exists():
-        cfg = yaml.safe_load(runs_file.read_text(encoding="utf-8")) or {}
-        runs = list((cfg.get("runs") or {}).keys())
-        new = _state().register(runs)
-        print(f"corridas registradas: {len(new)}")
-    print(f"ledger: {led.path}")
+    ws = _ws(args)
+    ws.ledger.append("init", {"version": __version__, "workspace": ws.name})
+    new = ws.state.register(ws.configured_runs())
+    print(f"workspace: {ws.name}")
+    print(f"corridas registradas: {len(new)}")
+    print(f"ledger: {ws.ledger.path}")
     return 0
 
 
 def cmd_status(args) -> int:
-    states = _state().all()
-    if not states:
-        print("nenhuma corrida registrada")
+    data = q.status(_ws(args))
+    if not data["runs"]:
+        print(f"{data['workspace']}: nenhuma corrida registrada")
         return 0
-    width = max(len(r) for r in states)
-    for run, st in sorted(states.items()):
+    width = max(len(r) for r in data["runs"])
+    print(f"workspace: {data['workspace']}")
+    for run, st in data["runs"].items():
         print(f"{run.ljust(width)}  {st}")
     return 0
 
 
 def cmd_move(args) -> int:
+    ws = _ws(args)
     try:
-        _state().move(args.run, args.to.upper(), args.justification)
+        ws.state.move(args.run, args.to.upper(), args.justification)
     except TransitionError as exc:
         print(f"recusado: {exc}", file=sys.stderr)
         return 2
-    print(f"{args.run} -> {args.to.upper()}")
+    print(f"{ws.name}/{args.run} -> {args.to.upper()}")
     return 0
 
 
 def cmd_decide(args) -> int:
-    entry = _ledger().append(
-        "decision", {"run": args.run, "text": args.text}, actor="human"
-    )
+    ws = _ws(args)
+    entry = ws.ledger.append("decision", {"run": args.run, "text": args.text}, actor="human")
     print(f"decisão registrada: {entry['hash'][:12]}")
     return 0
 
 
 def cmd_inventory(args) -> int:
-    summary = inv.build(Path(args.accessions), Path(args.out))
-    _ledger().append("inventory_built", summary)
-    print(f"projetos: {summary['projects']}")
+    ws = _ws(args)
+    summary = inv.build(ws.accessions_dir, ws.inventory_dir)
+    ws.ledger.append("inventory_built", summary)
+    print(f"workspace: {ws.name}")
+    print(f"estudos: {summary['projects']}")
     print(f"accessions: {summary['accessions']}")
     print(f"não encontrados no ENA: {summary['not_found']}")
     for path, digest in summary["files"].items():
@@ -83,21 +86,57 @@ def cmd_inventory(args) -> int:
 
 
 def cmd_verify(args) -> int:
-    res = _ledger().verify()
-    if res.ok:
-        print(f"ledger íntegro: {res.entries} entradas")
+    data = q.ledger_verify(_ws(args))
+    if data["ok"]:
+        print(f"ledger íntegro: {data['entries']} entradas")
         return 0
-    print(f"ledger quebrado na linha {res.broken_at}: {res.reason}")
+    print(f"ledger quebrado na linha {data['broken_at_line']}: {data['reason']}")
     return 1
+
+
+def cmd_show(args) -> int:
+    ws = _ws(args)
+    fn = {
+        "workspace": lambda: q.workspace_info(ws),
+        "run": lambda: q.run_detail(ws, args.arg),
+        "metrics": lambda: q.run_metrics(ws, args.arg),
+        "inventory": lambda: q.inventory(ws, args.arg),
+        "ledger": lambda: q.ledger_tail(ws, int(args.arg or 20)),
+        "errors": lambda: q.errors(ws, args.arg),
+    }[args.what]
+    try:
+        print(json.dumps(fn(), indent=2, ensure_ascii=False))
+    except q.QueryError as exc:
+        print(f"recusado: {exc}", file=sys.stderr)
+        return 2
+    return 0
+
+
+def cmd_mcp(args) -> int:
+    from .mcp_server import serve
+
+    serve(_ws(args), http=args.http, host=args.host, port=args.port)
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="sentinel", description=__doc__)
     p.add_argument("--version", action="version", version=__version__)
+    p.add_argument(
+        "-w",
+        "--workspace",
+        default=os.environ.get("SENTINEL_WORKSPACE", "."),
+        help="pasta do projeto (padrão: SENTINEL_WORKSPACE ou a pasta atual)",
+    )
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    s = sub.add_parser("init", help="cria .sentinel/ e registra as corridas")
-    s.add_argument("--runs", default="config/runs.yaml")
+    s = sub.add_parser("new", help="cria um workspace para um projeto")
+    s.add_argument("path")
+    s.add_argument("--name", required=True)
+    s.add_argument("--title")
+    s.set_defaults(func=cmd_new)
+
+    s = sub.add_parser("init", help="registra as corridas de config/runs.yaml")
     s.set_defaults(func=cmd_init)
 
     s = sub.add_parser("status", help="estado de cada corrida")
@@ -115,15 +154,28 @@ def main(argv: list[str] | None = None) -> int:
     s.set_defaults(func=cmd_decide)
 
     s = sub.add_parser("inventory", help="accessions x ENA")
-    s.add_argument("--accessions", default="data/accessions")
-    s.add_argument("--out", default=".sentinel/inventory")
     s.set_defaults(func=cmd_inventory)
 
     s = sub.add_parser("verify", help="confere a cadeia de hashes do ledger")
     s.set_defaults(func=cmd_verify)
 
+    s = sub.add_parser("show", help="mostra dados em JSON (o mesmo que o MCP devolve)")
+    s.add_argument("what", choices=["workspace", "run", "metrics", "inventory", "ledger", "errors"])
+    s.add_argument("arg", nargs="?")
+    s.set_defaults(func=cmd_show)
+
+    s = sub.add_parser("mcp", help="servidor MCP só de leitura, travado neste workspace")
+    s.add_argument("--http", action="store_true", help="Streamable HTTP em vez de stdio")
+    s.add_argument("--host", default="127.0.0.1")
+    s.add_argument("--port", type=int, default=8701)
+    s.set_defaults(func=cmd_mcp)
+
     args = p.parse_args(argv)
-    return args.func(args)
+    try:
+        return args.func(args)
+    except WorkspaceError as exc:
+        print(f"erro: {exc}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":
