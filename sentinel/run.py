@@ -44,7 +44,7 @@ from .workspace import Workspace
 
 DEFAULT_AMPLISEQ_RELEASE = "3.1.0"
 DEFAULT_WEBLOG_PORT = 8765
-RUN_SETTINGS_KEYS = ("ampliseq_release", "weblog_port", "qiime2_image")
+RUN_SETTINGS_KEYS = ("ampliseq_release", "weblog_port", "qiime2_image", "decontam_image")
 ENGINES = ("docker", "podman")
 SAMPLE_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]+$")
 PAIR1_RE = re.compile(r"_1\.f(ast)?q\.gz$")

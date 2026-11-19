@@ -14,7 +14,7 @@ import json
 import os
 import sys
 
-from . import __version__, deblur, fetch, listen, measure, reconcile
+from . import __version__, deblur, decontam, fetch, listen, measure, reconcile
 from . import inventory as inv
 from . import queries as q
 from . import run as run_worker
@@ -195,6 +195,25 @@ def cmd_measure(args) -> int:
     return 0 if res["state"] == "MEASURED" else 1
 
 
+def cmd_decontam(args) -> int:
+    ws = _ws(args)
+    try:
+        res = decontam.run_decontam(ws, args.run)
+    except decontam.DecontamRefused as exc:
+        print(f"recusado: {exc}", file=sys.stderr)
+        return 2
+    if res["status"] == "skipped":
+        print(f"{ws.name}/{res['run']}: {res['reason']}")
+        return 0
+    print(f"{ws.name}/{res['run']} -> {res['state']} (decontam: {res['status']})")
+    if res["status"] == "COMPLETED":
+        print(f"ASVs marcados: {len(res['flagged_asvs'])}")
+        print(f"{res['manifest']['path']}  sha256={res['manifest']['sha256'][:16]}")
+        return 0
+    print(f"motivo: {res.get('reason')}")
+    return 1
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="sentinel", description=__doc__)
     p.add_argument("--version", action="version", version=__version__)
@@ -260,6 +279,10 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("measure", help="extrai métricas do ampliseq e compara com config/rules.yaml")
     s.add_argument("run")
     s.set_defaults(func=cmd_measure)
+
+    s = sub.add_parser("decontam", help="identifica contaminantes quando runs.yaml declara negative_controls")
+    s.add_argument("run")
+    s.set_defaults(func=cmd_decontam)
 
     s = sub.add_parser("verify", help="confere a cadeia de hashes do ledger")
     s.set_defaults(func=cmd_verify)
