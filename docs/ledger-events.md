@@ -28,6 +28,9 @@ documented here when their stage lands.
 | `environment` | `sentinel run` | `run`, `ampliseq_release`, `nextflow_version`, `container_engine`, `container_engine_version`, `docker_version`, `colima_version`, `vm_config` (`name`, `status`, `vmType`, `rosetta`), `images` (list of `image`, `digest`), `conda_env` (`available`, `path`, `sha256` or `exit_code`/`stderr`), `samplesheet` and `params` (path and sha256) |
 | `run_completed` | `sentinel run` | `run`, `result` (`PROCESSING` or `BLOCKED`), `manifest` (path and sha256 of `run_manifest.json`), `outdir`, `images`, `artifacts` (trace/report/timeline/nextflow_log paths and sha256), or `error_log` when `BLOCKED` |
 | `experiment_recorded` | `sentinel run --denoiser deblur` | `run`, `experiment_id`, `denoiser` (`deblur`), `status` (`COMPLETED` or `FAILED`), `qiime2_image`, `parameters`, `artifacts` (paths and sha256), `experiment` (path and sha256 of `experiment.json`), `mlflow`, or `error_log` |
+| `process_started` | `sentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
+| `process_completed` | `sentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
+| `process_failed` | `sentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
 
 ## Notes
 
