@@ -14,7 +14,17 @@ import json
 import os
 import sys
 
-from . import __version__, deblur, decontam, fetch, listen, measure, publish, reconcile
+from . import (
+    __version__,
+    deblur,
+    decontam,
+    fetch,
+    listen,
+    measure,
+    merge,
+    publish,
+    reconcile,
+)
 from . import inventory as inv
 from . import queries as q
 from . import run as run_worker
@@ -244,6 +254,23 @@ def cmd_clean(args) -> int:
     return 0
 
 
+def cmd_merge(args) -> int:
+    ws = _ws(args)
+    try:
+        res = merge.run_merge(ws)
+    except merge.MergeRefused as exc:
+        print(f"recusado: {exc}", file=sys.stderr)
+        return 2
+    print(f"{ws.name}/merge -> {res['status']}")
+    for r, reg in sorted((res.get("regions_by_run") or {}).items()):
+        print(f"  {r}: {reg}")
+    if res.get("strategy"):
+        print(f"estratégia: {res['strategy']}")
+    if res.get("manifest"):
+        print(f"{res['manifest']['path']}  sha256={res['manifest']['sha256'][:16]}")
+    return 0 if res["status"] == "COMPLETED" else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="sentinel", description=__doc__)
     p.add_argument("--version", action="version", version=__version__)
@@ -321,6 +348,9 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("clean", help="apaga FASTQ e work/ locais apenas em PUBLISHED após conferir hashes remotos")
     s.add_argument("run")
     s.set_defaults(func=cmd_clean)
+
+    s = sub.add_parser("merge", help="une corridas PUBLISHED/CLEANED, atribui taxonomia SILVA e gera replay-supplement")
+    s.set_defaults(func=cmd_merge)
 
     s = sub.add_parser("verify", help="confere a cadeia de hashes do ledger")
     s.set_defaults(func=cmd_verify)
