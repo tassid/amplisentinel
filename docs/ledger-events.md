@@ -37,6 +37,9 @@ documented here when their stage lands.
 | `cleaned` | `sentinel clean` | `run`, `deleted_count`, `deleted_files` (`path`, `bytes`, `md5`, `sha256`), `manifest` (path and sha256 of `clean_manifest.json`) |
 | `merge` | `sentinel merge` | `run` (`merge`), `runs`, `regions_by_run`, `strategy`, `qiime2_image`, `silva_classifier` (`path`, `md5`, `sha256`), `artifacts` (including `replay_supplement`), `manifest` (path and sha256) |
 | `between_metrics` | `sentinel between` | `run` (`between`), `seed`, `permutations`, `metric`, `sources` (`input`, `metadata`), `results` (`study`, `diagnosis` with `R2`, `pseudo_F`, `p_value`), `output` (path and sha256 of `.sentinel/metrics/between.json`) |
+| `export` | `sentinel export` | `run` (`ml`), `source_qza_uuid`, `source_qza`, `tsv`, `parquet`, `rows`, `columns`, `manifest` |
+| `folds` | `sentinel folds` | `run` (`ml`), `scheme` (`leave-one-project-out`), `n_folds`, `source_qza_uuid`, `folds_file` (path and sha256), `folds` (counts by class) |
+| `ml_trained` | `sentinel train` | `run` (`ml`), `seed`, `source_qza_uuid`, `folds_sha256`, `versions`, `metrics`, `artifacts` (`shap_values`, `tsne_coords`), `mlflow`, `manifest` |
 
 ## Notes
 

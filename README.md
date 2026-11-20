@@ -53,7 +53,8 @@ move to the next. Sentinel makes that loop reproducible and auditable:
 | publish / clean (Drive, DVC, MLflow) | working |
 | merge (QIIME 2 merge, SILVA by MD5, replay-supplement) | working |
 | between (PERMANOVA with scikit-bio) | working |
-| ML bridge (export, LOPO folds, Random Forest, SHAP, MLflow) | next |
+| ML bridge (export, LOPO folds, Random Forest, SHAP, MLflow) | working |
+| MCP server (read only, 13 tools, serve-all, launchd) | next |
 | Workspaces (one per research project) | working |
 | MCP server (read only, locked to one workspace, stdio or HTTP) | working |
 
