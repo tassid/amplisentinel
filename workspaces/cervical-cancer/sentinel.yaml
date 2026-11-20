@@ -1,3 +1,5 @@
 name: cervical-cancer
 title: Cervical cancer microbiome (multi-study 16S)
 description: Public cervicovaginal 16S studies (P1 to P22) processed one sequencing run at a time.
+run:
+  ampliseq_release: "3.1.0"

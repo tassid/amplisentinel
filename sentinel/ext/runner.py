@@ -15,6 +15,7 @@ import subprocess
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 
 from ..workspace import Workspace
 
@@ -51,12 +52,32 @@ class ToolError(Exception):
         self.log = log
 
 
+def _unique_file(log_dir: Path, prefix: str, suffix: str = "") -> Path:
+    candidate = log_dir / f"{prefix}{suffix}"
+    n = 2
+    while candidate.exists():
+        candidate = log_dir / f"{prefix}-{n}{suffix}"
+        n += 1
+    return candidate
+
+
+def _unique_log_pair(log_dir: Path, stamp: str, tool_name: str) -> tuple[Path, Path]:
+    out_path = log_dir / f"{stamp}-{tool_name}.stdout"
+    err_path = log_dir / f"{stamp}-{tool_name}.stderr"
+    n = 2
+    while out_path.exists() or err_path.exists():
+        out_path = log_dir / f"{stamp}-{tool_name}-{n}.stdout"
+        err_path = log_dir / f"{stamp}-{tool_name}-{n}.stderr"
+        n += 1
+    return out_path, err_path
+
+
 def save_log(ws: Workspace, label: str, data: bytes) -> dict:
     """Save bytes under .sentinel/logs/ and return {"path", "sha256"}."""
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     log_dir = ws.home / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
-    path = log_dir / f"{stamp}-{label}"
+    path = _unique_file(log_dir, f"{stamp}-{label}")
     path.write_bytes(data)
     return {"path": str(path), "sha256": hashlib.sha256(data).hexdigest()}
 
@@ -90,23 +111,24 @@ def call(
     version_argv: list[str],
     runner: Runner = subprocess_runner,
     context: dict | None = None,
+    check: bool = True,
 ) -> CallRecord:
     """Run one external command, log it, and return its record.
 
-    Raises ToolError when the exit code is not zero. The ledger keeps both the
-    `tool_call` and the `error` event in that case. `context` (for example
-    {"run": "P1"}) is added to both events.
+    When check is True (default), raises ToolError on a non-zero exit code and
+    writes both `tool_call` and `error` to the ledger. When check is False,
+    writes `tool_call` and returns the CallRecord even on non-zero exit.
     """
     ctx = dict(context or {})
     tool = argv[0]
+    tool_name = Path(tool).name or "tool"
     version = tool_version(version_argv, runner)
     res = runner(argv)
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     log_dir = ws.home / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
-    out_path = log_dir / f"{stamp}-{tool}.stdout"
-    err_path = log_dir / f"{stamp}-{tool}.stderr"
+    out_path, err_path = _unique_log_pair(log_dir, stamp, tool_name)
     out_path.write_bytes(res.stdout)
     err_path.write_bytes(res.stderr)
 
@@ -132,7 +154,7 @@ def call(
             "stderr": {"path": record.stderr_path, "sha256": record.stderr_sha256},
         },
     )
-    if res.returncode != 0:
+    if check and res.returncode != 0:
         ws.ledger.append(
             "error",
             {
