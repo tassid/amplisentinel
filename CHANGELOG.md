@@ -4,6 +4,15 @@ All notable changes to `amplisentinel` are documented in this file.
 
 The format follows Keep a Changelog and uses Semantic Versioning.
 
+## [Unreleased]
+
+### Added
+- `sentinel ui`: local browser dashboard on 127.0.0.1 (runs, states, Nextflow process events, metrics with rules, errors, ledger, report) with buttons that run the same CLI commands one at a time, recorded as `ui_command` and `ui_command_finished`. Starts the weblog receiver with it.
+
+### Fixed
+- Ledger appends now hold a cross-process file lock, so concurrent writers (`run` with `listen` or `ui`) cannot fork the hash chain.
+- On Windows the weblog receiver and the dashboard refuse a port already in use instead of binding it silently.
+
 ## [0.2.0] - 2026-11-19
 
 ### Added

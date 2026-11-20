@@ -10,8 +10,12 @@ from __future__ import annotations
 import getpass
 import hashlib
 import json
+import os
 import platform
 import subprocess
+import threading
+import time
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -35,6 +39,47 @@ def git_commit(cwd: Path | None = None) -> str | None:
         return out.stdout.strip()
     except (OSError, subprocess.CalledProcessError):
         return None
+
+
+_THREAD_LOCK = threading.Lock()
+
+
+@contextmanager
+def _exclusive(lock_path: Path):
+    """Cross-process lock around read-last-hash + append.
+
+    Several processes write the same ledger (for example `sentinel run` and
+    `sentinel listen` or `sentinel ui`). Without this lock two events could
+    point to the same previous hash and break the chain.
+    """
+    with _THREAD_LOCK:
+        fh = open(lock_path, "a+b")  # noqa: SIM115 (released in finally below)
+        try:
+            if os.name == "nt":
+                import msvcrt
+
+                fh.seek(0)
+                while True:
+                    try:
+                        msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+                        break
+                    except OSError:
+                        time.sleep(0.01)
+                try:
+                    yield
+                finally:
+                    fh.seek(0)
+                    msvcrt.locking(fh.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+                try:
+                    yield
+                finally:
+                    fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+        finally:
+            fh.close()
 
 
 @dataclass
@@ -65,19 +110,21 @@ class Ledger:
         "human" for decisions typed by the researcher."""
         if actor not in {"sentinel", "human"}:
             raise ValueError("actor must be 'sentinel' or 'human'")
-        body = {
-            "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "event": event,
-            "actor": actor,
-            "user": getpass.getuser(),
-            "host": platform.node(),
-            "git_commit": git_commit(self.path.parent),
-            "data": data or {},
-            "prev": self._last_hash(),
-        }
-        body["hash"] = _sha256(_canonical(body))
-        with self.path.open("a", encoding="utf-8") as fh:
-            fh.write(_canonical(body) + "\n")
+        commit = git_commit(self.path.parent)
+        with _exclusive(self.path.with_name(self.path.name + ".lock")):
+            body = {
+                "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "event": event,
+                "actor": actor,
+                "user": getpass.getuser(),
+                "host": platform.node(),
+                "git_commit": commit,
+                "data": data or {},
+                "prev": self._last_hash(),
+            }
+            body["hash"] = _sha256(_canonical(body))
+            with self.path.open("a", encoding="utf-8") as fh:
+                fh.write(_canonical(body) + "\n")
         return body
 
     def entries(self) -> list[dict]:

@@ -8,6 +8,7 @@ entries to the workspace ledger in arrival order.
 from __future__ import annotations
 
 import json
+import os
 import re
 import threading
 import urllib.parse
@@ -103,6 +104,14 @@ def handle_weblog_payload(
     return {"ok": True, "recorded": True, "event": ledger_event, "hash": entry["hash"], "run": run_name}
 
 
+class ExclusiveHTTPServer(ThreadingHTTPServer):
+    """On Windows SO_REUSEADDR lets a second server bind a port already in use
+    and silently miss the requests. Refuse the bind instead."""
+
+    allow_reuse_address = os.name != "nt"
+    daemon_threads = True
+
+
 def make_server(
     ws: Workspace,
     *,
@@ -157,7 +166,7 @@ def make_server(
         def log_message(self, format: str, *args: Any) -> None:
             return
 
-    return ThreadingHTTPServer((host, resolved_port), Handler)
+    return ExclusiveHTTPServer((host, resolved_port), Handler)
 
 
 def serve(ws: Workspace, *, port: int | None = None, default_run: str | None = None) -> int:

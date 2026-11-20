@@ -386,6 +386,14 @@ def cmd_train(args) -> int:
     return 0
 
 
+def cmd_ui(args) -> int:
+    from . import ui
+
+    ws = _ws(args)
+    ui.serve(ws, port=args.port, open_browser=not args.no_browser, with_listener=not args.no_listen)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="sentinel", description=__doc__)
     p.add_argument("--version", action="version", version=__version__)
@@ -536,6 +544,13 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("report", help="gera relatório HTML estático determinístico do workspace")
     s.add_argument("--out")
     s.set_defaults(func=cmd_report)
+
+    s = sub.add_parser("ui", help="painel no navegador em 127.0.0.1: acompanha e roda os comandos deste workspace")
+    s.add_argument("--port", type=int, default=8800)
+    s.add_argument("--no-browser", action="store_true", help="não abre o navegador automaticamente")
+    s.add_argument("--no-listen", action="store_true",
+                   help="não inicia o receptor weblog do Nextflow (use se `sentinel listen` já estiver rodando)")
+    s.set_defaults(func=cmd_ui)
 
     args = p.parse_args(argv)
     try:
