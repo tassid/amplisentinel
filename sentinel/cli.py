@@ -14,7 +14,7 @@ import json
 import os
 import sys
 
-from . import __version__, deblur, fetch, listen, reconcile
+from . import __version__, deblur, fetch, listen, measure, reconcile
 from . import inventory as inv
 from . import queries as q
 from . import run as run_worker
@@ -180,6 +180,21 @@ def cmd_listen(args) -> int:
     return listen.serve(_ws(args), port=args.port, default_run=args.run)
 
 
+def cmd_measure(args) -> int:
+    ws = _ws(args)
+    try:
+        res = measure.measure_run(ws, args.run)
+    except measure.MeasureRefused as exc:
+        print(f"recusado: {exc}", file=sys.stderr)
+        return 2
+    print(f"{ws.name}/{res['run']} -> {res['state']}")
+    print(f"métricas: {res['metrics_count']}  violações: {len(res['violations'])}")
+    for v in res["violations"]:
+        print(f"  {v['metric']}: {v['value']} ({v['result']} {v['rule']})")
+    print(f"{res['metrics']['path']}  sha256={res['metrics']['sha256'][:16]}")
+    return 0 if res["state"] == "MEASURED" else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="sentinel", description=__doc__)
     p.add_argument("--version", action="version", version=__version__)
@@ -241,6 +256,10 @@ def main(argv: list[str] | None = None) -> int:
                    help="porta local (padrão: run.weblog_port ou 8765)")
     s.add_argument("--run", default=None, help="nome da corrida quando não estiver nos parâmetros do evento")
     s.set_defaults(func=cmd_listen)
+
+    s = sub.add_parser("measure", help="extrai métricas do ampliseq e compara com config/rules.yaml")
+    s.add_argument("run")
+    s.set_defaults(func=cmd_measure)
 
     s = sub.add_parser("verify", help="confere a cadeia de hashes do ledger")
     s.set_defaults(func=cmd_verify)
