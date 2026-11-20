@@ -7,12 +7,14 @@ The format follows Keep a Changelog and uses Semantic Versioning.
 ## [Unreleased]
 
 ### Changed
+- README: step by step installation for macOS (Homebrew, Colima, conda, rclone) with a check after each step, first run, fields the researcher fills in, update and common problems; shorter Linux and Windows notes.
 - Project renamed to AmpliSentinel everywhere: Python package `amplisentinel`, command `amplisentinel`, variable `AMPLISENTINEL_WORKSPACE`, workspace file `amplisentinel.yaml`, data folder `.amplisentinel/`, `~/.amplisentinel/workspaces.yaml`, ledger actor `amplisentinel`, repository `tassid/amplisentinel`.
 
 ### Added
 - `amplisentinel ui`: local browser dashboard on 127.0.0.1 (runs, states, Nextflow process events, metrics with rules, errors, ledger, report) with buttons that run the same CLI commands one at a time, recorded as `ui_command` and `ui_command_finished`. Starts the weblog receiver with it.
 
 ### Fixed
+- `environment.yml`: `shap==0.54.1` moved to the pip section; that version is not on conda-forge, so `conda env create` failed.
 - Ledger appends now hold a cross-process file lock, so concurrent writers (`run` with `listen` or `ui`) cannot fork the hash chain.
 - On Windows the weblog receiver and the dashboard refuse a port already in use instead of binding it silently.
 

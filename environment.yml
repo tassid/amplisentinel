@@ -6,9 +6,9 @@ dependencies:
   - pandas=3.1.1
   - scikit-bio=0.7.4
   - scikit-learn=1.9.1
-  - shap=0.54.1
   - mlflow=3.18.0
   - pyyaml=6.0.3
   - pip
   - pip:
       - mcp==2.3.0
+      - shap==0.54.1   # not on conda-forge yet; PyPI has macOS and Linux wheels
