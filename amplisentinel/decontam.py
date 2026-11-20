@@ -29,10 +29,10 @@ def _decontam_image(ws: Workspace) -> str:
     block = meta.get("run") or {}
     image = block.get("decontam_image")
     if not isinstance(image, str) or not image.strip():
-        raise DecontamRefused("sentinel.yaml: falta run.decontam_image travada por digest (@sha256:...)")
+        raise DecontamRefused("amplisentinel.yaml: falta run.decontam_image travada por digest (@sha256:...)")
     if "@sha256:" not in image:
         raise DecontamRefused(
-            f"sentinel.yaml run.decontam_image precisa estar travada por digest (@sha256:...): {image}"
+            f"amplisentinel.yaml run.decontam_image precisa estar travada por digest (@sha256:...): {image}"
         )
     return image.strip()
 
@@ -84,7 +84,7 @@ def run_decontam(
     current = ws.state.get(run)
     if current == "BLOCKED":
         raise DecontamRefused(
-            f"{run} está em BLOCKED; sair de BLOCKED exige `sentinel move {run} PROCESSING -j`"
+            f"{run} está em BLOCKED; sair de BLOCKED exige `amplisentinel move {run} PROCESSING -j`"
         )
     if current not in ("PROCESSING", "MEASURED"):
         raise DecontamRefused(f"{run} está em {current}; decontam exige PROCESSING ou MEASURED")

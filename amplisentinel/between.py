@@ -1,8 +1,8 @@
 """Stage 8: between-project PERMANOVA metrics using scikit-bio.
 
-`sentinel between` runs PERMANOVA on beta diversity by study/project and by
+`amplisentinel between` runs PERMANOVA on beta diversity by study/project and by
 diagnosis, recording R2, pseudo-F, p-value, permutations, and seed in
-`.sentinel/metrics/between.json` and in the `between_metrics` ledger event.
+`.amplisentinel/metrics/between.json` and in the `between_metrics` ledger event.
 Numbers only, no interpretive text.
 """
 

@@ -1,6 +1,6 @@
 """Run worker: execute nf-core/ampliseq for one verified sequencing run.
 
-`sentinel run <RUN>`:
+`amplisentinel run <RUN>`:
 
 1. Reads `runs.yaml` and `runs/<RUN>/fetch_manifest.json`. Refuses before
    changing state if the run is not in `MD5_OK` or `PROCESSING`, if `region`
@@ -10,7 +10,7 @@
    parameter file (`params.yaml`) from `runs.yaml`. No scientific parameters
    (such as truncation or quality cutoffs) are suggested or filled in.
 3. Transitions `MD5_OK -> PROCESSING` (or resumes `PROCESSING`).
-4. Captures the execution environment through `sentinel/ext/` and appends an
+4. Captures the execution environment through `amplisentinel/ext/` and appends an
    `environment` event to the ledger before running Nextflow: Nextflow version,
    ampliseq release, `colima version`, `docker version` (or `podman`), Colima
    VM settings (`vmType`, `rosetta`), container image digests, and the sha256 of
@@ -18,7 +18,7 @@
 5. Executes Nextflow with `-r <release>`, `-profile <docker|podman>`, `-resume`,
    `-with-trace`, `-with-report`, `-with-timeline`, and
    `-with-weblog http://127.0.0.1:<port>/events`.
-6. Success keeps the run in `PROCESSING` until `sentinel measure` (Stage 5).
+6. Success keeps the run in `PROCESSING` until `amplisentinel measure` (Stage 5).
    Any Nextflow or required-tool failure transitions `PROCESSING -> BLOCKED`
    with the literal stderr saved and referenced in the ledger.
 """
@@ -63,25 +63,25 @@ class RunSettings:
 
 
 def settings(ws: Workspace, *, weblog_port_override: int | None = None) -> RunSettings:
-    """Run settings from sentinel.yaml. Unknown keys in `run` are refused."""
+    """Run settings from amplisentinel.yaml. Unknown keys in `run` are refused."""
     meta = ws.meta
     block = meta.get("run") or {}
     if not isinstance(block, dict):
-        raise ConfigError("sentinel.yaml: 'run' precisa ser um mapa")
+        raise ConfigError("amplisentinel.yaml: 'run' precisa ser um mapa")
     unknown = sorted(str(k) for k in block if k not in RUN_SETTINGS_KEYS)
     if unknown:
         raise ConfigError(
-            f"sentinel.yaml run: chave desconhecida {unknown}; aceitas: {', '.join(RUN_SETTINGS_KEYS)}"
+            f"amplisentinel.yaml run: chave desconhecida {unknown}; aceitas: {', '.join(RUN_SETTINGS_KEYS)}"
         )
     release = block.get("ampliseq_release", DEFAULT_AMPLISEQ_RELEASE)
     if not isinstance(release, str) or not release.strip():
-        raise ConfigError("sentinel.yaml run.ampliseq_release: esperado texto")
+        raise ConfigError("amplisentinel.yaml run.ampliseq_release: esperado texto")
     port = weblog_port_override if weblog_port_override is not None else block.get("weblog_port", DEFAULT_WEBLOG_PORT)
     if isinstance(port, bool) or not isinstance(port, int) or not (1 <= port <= 65535):
-        raise ConfigError("sentinel.yaml run.weblog_port: esperado inteiro entre 1 e 65535")
+        raise ConfigError("amplisentinel.yaml run.weblog_port: esperado inteiro entre 1 e 65535")
     engine = meta.get("container_engine", "docker")
     if engine not in ENGINES:
-        raise ConfigError(f"sentinel.yaml container_engine: aceitos {', '.join(ENGINES)}")
+        raise ConfigError(f"amplisentinel.yaml container_engine: aceitos {', '.join(ENGINES)}")
     return RunSettings(release.strip(), port, engine)
 
 
@@ -124,7 +124,7 @@ def _pick_pair(acc: str, paths: list[Path]) -> tuple[Path, Path | None]:
 def _load_samplesheet_rows(ws: Workspace, run: str, rc: RunConfig) -> tuple[list[dict[str, str]], bool]:
     manifest_path = ws.root / "runs" / run / "fetch_manifest.json"
     if not manifest_path.exists():
-        raise RunRefused(f"corrida {run}: falta {manifest_path}; execute `sentinel fetch {run}` antes")
+        raise RunRefused(f"corrida {run}: falta {manifest_path}; execute `amplisentinel fetch {run}` antes")
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
@@ -481,7 +481,7 @@ def run_ampliseq(
 
     current = ws.state.get(run)
     if current == "BLOCKED":
-        raise RunRefused(f"{run} está em BLOCKED; sair de BLOCKED exige `sentinel move {run} PROCESSING -j`")
+        raise RunRefused(f"{run} está em BLOCKED; sair de BLOCKED exige `amplisentinel move {run} PROCESSING -j`")
     if current not in ("MD5_OK", "PROCESSING"):
         raise RunRefused(f"{run} está em {current}; run só roda em MD5_OK ou PROCESSING")
 

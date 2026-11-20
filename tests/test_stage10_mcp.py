@@ -6,9 +6,9 @@ import json
 
 import pytest
 
-from sentinel import serve_all
-from sentinel.cli import main
-from sentinel.workspace import Workspace
+from amplisentinel import serve_all
+from amplisentinel.cli import main
+from amplisentinel.workspace import Workspace
 
 
 def _populated_ws(tmp_path, name: str, run: str) -> Workspace:
@@ -39,7 +39,7 @@ def test_mcp_all_13_tools_read_only_and_isolated_between_two_workspaces(tmp_path
     pytest.importorskip("mcp")
     from mcp.server.mcpserver.exceptions import ToolError as McpToolError
 
-    from sentinel.mcp_server import build_server
+    from amplisentinel.mcp_server import build_server
 
     ws_a = _populated_ws(tmp_path, "cervical", "P1")
     ws_b = _populated_ws(tmp_path, "rice", "R1")

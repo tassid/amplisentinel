@@ -7,8 +7,8 @@ import urllib.request
 
 import pytest
 
-from sentinel import listen
-from sentinel.workspace import Workspace
+from amplisentinel import listen
+from amplisentinel.workspace import Workspace
 
 
 def _post_json(url: str, payload: dict | str) -> tuple[int, dict]:

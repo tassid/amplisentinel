@@ -1,7 +1,7 @@
-"""Stage 11: deterministic static HTML report per workspace (`sentinel report`).
+"""Stage 11: deterministic static HTML report per workspace (`amplisentinel report`).
 
-Generated strictly from `.sentinel/ledger.jsonl`, `.sentinel/state.json`,
-`.sentinel/metrics/*.json`, and `.qzv` files inside the workspace. Every number
+Generated strictly from `.amplisentinel/ledger.jsonl`, `.amplisentinel/state.json`,
+`.amplisentinel/metrics/*.json`, and `.qzv` files inside the workspace. Every number
 cites its source file and sha256. Human entries (`actor == "human"`) are copied
 literally. No AI-generated or interpretive text appears anywhere in the HTML.
 """
@@ -207,7 +207,7 @@ def render_report_html(ws: Workspace, *, generated_at: str | None = None) -> tup
 <head>
 <meta charset="utf-8">
 <meta name="generated-at" content="{_esc(ts)}">
-<title>Sentinel Report: {_esc(title)}</title>
+<title>AmpliSentinel Report: {_esc(title)}</title>
 <style>
 body {{ font-family: system-ui, -apple-system, sans-serif; margin: 2rem auto; max-width: 1080px; color: #1a202c; line-height: 1.5; }}
 h1, h2, h3 {{ color: #1a365d; }}
@@ -219,7 +219,7 @@ pre {{ margin: 0; white-space: pre-wrap; }}
 </style>
 </head>
 <body>
-<h1>Sentinel Report: {_esc(title)}</h1>
+<h1>AmpliSentinel Report: {_esc(title)}</h1>
 <p>Workspace: {_code(ws.name)} | Generated at: {_code(ts)}</p>
 <p>Ledger verify: {_code('OK' if verify.ok else 'BROKEN')} ({verify.entries} entries) |
 Ledger source: {_code(ws.ledger.path.relative_to(ws.root).as_posix() if ws.ledger.path.exists() else '')}
@@ -263,7 +263,7 @@ def generate_report(
     out_path: Path | None = None,
     generated_at: str | None = None,
 ) -> dict[str, Any]:
-    """Generate and atomically write `.sentinel/report.html` (or `out_path`)."""
+    """Generate and atomically write `.amplisentinel/report.html` (or `out_path`)."""
     target = out_path or (ws.home / "report.html")
     html_text, meta = render_report_html(ws, generated_at=generated_at)
     digest = write_text_atomic(target, html_text)

@@ -13,9 +13,9 @@ requires-python = ">=3.10"
 dependencies = ["pyyaml>=6", "pandas>=2.0"]
 
 [project.urls]
-Homepage = "https://github.com/tassid/sentinel"
-Repository = "https://github.com/tassid/sentinel"
-Issues = "https://github.com/tassid/sentinel/issues"
+Homepage = "https://github.com/tassid/amplisentinel"
+Repository = "https://github.com/tassid/amplisentinel"
+Issues = "https://github.com/tassid/amplisentinel/issues"
 
 [project.optional-dependencies]
 mcp = ["mcp>=2.3"]
@@ -23,7 +23,7 @@ ml = ["scikit-bio>=0.6", "scikit-learn>=1.4", "shap>=0.45", "mlflow>=2.12"]
 dev = ["pytest>=8", "ruff>=0.8", "mcp>=2.3", "scikit-bio>=0.6", "scikit-learn>=1.4", "shap>=0.45", "mlflow>=2.12"]
 
 [project.scripts]
-sentinel = "sentinel.cli:main"
+amplisentinel = "amplisentinel.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["sentinel*"]
+include = ["amplisentinel*"]

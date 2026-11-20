@@ -6,7 +6,7 @@ from pathlib import Path
 
 import yaml
 
-import sentinel
+import amplisentinel
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -26,7 +26,7 @@ def _read_pyproject_meta() -> tuple[str, str]:
 def test_version_matches_pyproject_citation_and_changelog():
     name, version = _read_pyproject_meta()
     assert name == "amplisentinel"
-    assert sentinel.__version__ == version
+    assert amplisentinel.__version__ == version
 
     cff = yaml.safe_load((ROOT / "CITATION.cff").read_text(encoding="utf-8"))
     assert cff["cff-version"] == "1.2.0"
@@ -51,7 +51,7 @@ def test_ci_workflow_runs_pytest_and_ruff_on_linux_and_macos():
 
 def test_no_em_or_en_dashes_in_code_or_docs():
     paths = [
-        *ROOT.joinpath("sentinel").rglob("*.py"),
+        *ROOT.joinpath("amplisentinel").rglob("*.py"),
         *ROOT.joinpath("tests").rglob("*.py"),
         *ROOT.joinpath("docs").rglob("*"),
         ROOT / "README.md",

@@ -5,7 +5,7 @@ public data services and the AI interface, listed at the end.
 
 ## Essential in phase 1
 
-| Tool | Role in Sentinel | License |
+| Tool | Role in AmpliSentinel | License |
 |---|---|---|
 | QIIME 2 | Import, taxonomy, diversity; provenance in every .qza/.qzv | BSD-3-Clause |
 | DADA2 | ASVs with one error model per sequencing run | LGPL-2 |

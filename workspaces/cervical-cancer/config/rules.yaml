@@ -1,4 +1,4 @@
-# Thresholds written by the researcher. Sentinel compares values against them
+# Thresholds written by the researcher. AmpliSentinel compares values against them
 # and reports "below" / "above" / "within". It never suggests a value.
 # Leave the file empty to get raw numbers only.
 #

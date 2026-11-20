@@ -2,7 +2,7 @@
 
 Each run may have the keys listed in RUN_KEYS. A missing key and a null value
 mean the same thing: not filled in yet. `region` and `primers` come from each
-study's methods, and the researcher fills them. Sentinel never fills in a
+study's methods, and the researcher fills them. AmpliSentinel never fills in a
 scientific value. Unknown keys are refused, and the error lists the accepted keys.
 """
 

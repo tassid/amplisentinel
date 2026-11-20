@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from sentinel import publish
-from sentinel.cli import main
-from sentinel.ext import CallResult
-from sentinel.workspace import Workspace
+from amplisentinel import publish
+from amplisentinel.cli import main
+from amplisentinel.ext import CallResult
+from amplisentinel.workspace import Workspace
 
 
 def _md5(b: bytes) -> str:

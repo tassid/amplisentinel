@@ -7,14 +7,14 @@ from pathlib import Path
 import pytest
 import yaml
 
-from sentinel import run
-from sentinel.cli import main
-from sentinel.ext import CallResult
-from sentinel.runs import ConfigError
-from sentinel.state import TransitionError
-from sentinel.workspace import Workspace
+from amplisentinel import run
+from amplisentinel.cli import main
+from amplisentinel.ext import CallResult
+from amplisentinel.runs import ConfigError
+from amplisentinel.state import TransitionError
+from amplisentinel.workspace import Workspace
 
-FAKE_CONDA_YAML = b"name: sentinel\nchannels:\n  - conda-forge\ndependencies:\n  - python=3.11\n"
+FAKE_CONDA_YAML = b"name: amplisentinel\nchannels:\n  - conda-forge\ndependencies:\n  - python=3.11\n"
 IMG_CUTADAPT = "quay.io/biocontainers/cutadapt:4.9--py39hbcbf7aa_2"
 IMG_DADA2 = "quay.io/biocontainers/bioconductor-dada2:1.30.0--r43hf17093f_0"
 DIG_CUTADAPT = "sha256:" + "a" * 64
@@ -131,7 +131,7 @@ def make_ready_ws(
     )
     (ws.accessions_dir / "S1_runs.txt").write_text("SRR1\nSRR2\n", encoding="utf-8")
     if meta_extra:
-        with (ws.root / "sentinel.yaml").open("a", encoding="utf-8") as fh:
+        with (ws.root / "amplisentinel.yaml").open("a", encoding="utf-8") as fh:
             fh.write(meta_extra)
 
     fastq_dir = ws.root / "runs" / "S1" / "fastq"
@@ -163,7 +163,7 @@ def test_samplesheet_and_params_match_ampliseq_3_1_0_fixture(tmp_path):
     ws = make_ready_ws(tmp_path, metadata="config/meta.tsv")
     (ws.root / "config" / "meta.tsv").write_text("ID\tgroup\nSRR1\ta\nSRR2\tb\n", encoding="utf-8")
     tools = FakeRunTools()
-    res = run.run_ampliseq(ws, "S1", runner=tools, environ={"CONDA_PREFIX": "/envs/sentinel"})
+    res = run.run_ampliseq(ws, "S1", runner=tools, environ={"CONDA_PREFIX": "/envs/amplisentinel"})
 
     assert res["state"] == "PROCESSING"
     assert ws.state.get("S1") == "PROCESSING"
@@ -206,7 +206,7 @@ def test_single_end_samplesheet_omits_fastq_2_and_sets_sequencing_type(tmp_path)
 def test_exact_nextflow_command_and_environment_logged_before_run(tmp_path):
     ws = make_ready_ws(tmp_path, meta_extra="run:\n  ampliseq_release: '3.1.0'\n  weblog_port: 8999\n")
     tools = FakeRunTools()
-    run.run_ampliseq(ws, "S1", runner=tools, environ={"CONDA_PREFIX": "/opt/conda/envs/sentinel"})
+    run.run_ampliseq(ws, "S1", runner=tools, environ={"CONDA_PREFIX": "/opt/conda/envs/amplisentinel"})
 
     entries = ws.ledger.entries()
     events = [e["event"] for e in entries]

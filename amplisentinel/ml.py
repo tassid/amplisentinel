@@ -1,11 +1,11 @@
 """Stage 9: ML bridge (export with .qza UUID, deterministic LOPO folds, RF/t-SNE/SHAP).
 
 Commands:
-- `sentinel export`: exports merged feature table to TSV and Parquet using pandas
+- `amplisentinel export`: exports merged feature table to TSV and Parquet using pandas
   and records the source `.qza` UUID in the ledger.
-- `sentinel folds`: builds deterministic leave-one-project-out (LOPO) folds with
+- `amplisentinel folds`: builds deterministic leave-one-project-out (LOPO) folds with
   per-class sample counts and hashes.
-- `sentinel train`: runs Random Forest, t-SNE (scikit-learn), and SHAP from a
+- `amplisentinel train`: runs Random Forest, t-SNE (scikit-learn), and SHAP from a
   researcher-written hyperparameter file (`config/ml.yaml`) and records seed,
   library versions, folds hash, and `.qza` UUID in both the ledger and MLflow.
 """

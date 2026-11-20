@@ -1,11 +1,11 @@
 """Stage 7: project-wide QIIME 2 merge, SILVA taxonomy, and Provenance Replay.
 
-`sentinel merge`:
+`amplisentinel merge`:
 1. Requires every configured run to be in `PUBLISHED` or `CLEANED`.
 2. Checks `region` across `runs.yaml`. If regions differ and no human decision
-   has been recorded with `sentinel decide merge "..."`, stops in `BLOCKED`
+   has been recorded with `amplisentinel decide merge "..."`, stops in `BLOCKED`
    and lists the regions by run.
-3. Verifies the pinned SILVA classifier MD5 against `sentinel.yaml`, runs
+3. Verifies the pinned SILVA classifier MD5 against `amplisentinel.yaml`, runs
    `qiime feature-table merge`, `qiime feature-table merge-seqs`,
    `qiime feature-classifier classify-sklearn`, and
    `qiime tools replay-supplement` in the pinned QIIME 2 container.
@@ -32,31 +32,31 @@ class MergeRefused(Exception):
 
 
 def merge_settings(ws: Workspace) -> dict[str, str]:
-    """Read and validate `merge` settings from sentinel.yaml."""
+    """Read and validate `merge` settings from amplisentinel.yaml."""
     meta = ws.meta
     block = meta.get("merge") or {}
     if not isinstance(block, dict):
-        raise ConfigError("sentinel.yaml: 'merge' precisa ser um mapa")
+        raise ConfigError("amplisentinel.yaml: 'merge' precisa ser um mapa")
     unknown = sorted(str(k) for k in block if k not in MERGE_KEYS)
     if unknown:
         raise ConfigError(
-            f"sentinel.yaml merge: chave desconhecida {unknown}; aceitas: {', '.join(MERGE_KEYS)}"
+            f"amplisentinel.yaml merge: chave desconhecida {unknown}; aceitas: {', '.join(MERGE_KEYS)}"
         )
     run_block = meta.get("run") or {}
     image = block.get("qiime2_image") or (run_block.get("qiime2_image") if isinstance(run_block, dict) else None)
     if not isinstance(image, str) or not image.strip() or "@sha256:" not in image:
         raise MergeRefused(
-            "sentinel.yaml: falta imagem QIIME 2 travada por digest (@sha256:...) em merge.qiime2_image ou run.qiime2_image"
+            "amplisentinel.yaml: falta imagem QIIME 2 travada por digest (@sha256:...) em merge.qiime2_image ou run.qiime2_image"
         )
     silva = block.get("silva_classifier")
     silva_md5 = block.get("silva_md5")
     if not isinstance(silva, str) or not silva.strip():
-        raise MergeRefused("sentinel.yaml: falta merge.silva_classifier")
+        raise MergeRefused("amplisentinel.yaml: falta merge.silva_classifier")
     if not isinstance(silva_md5, str) or not silva_md5.strip():
-        raise MergeRefused("sentinel.yaml: falta merge.silva_md5")
+        raise MergeRefused("amplisentinel.yaml: falta merge.silva_md5")
     engine = meta.get("container_engine", "docker")
     if engine not in ENGINES:
-        raise ConfigError(f"sentinel.yaml container_engine: aceitos {', '.join(ENGINES)}")
+        raise ConfigError(f"amplisentinel.yaml container_engine: aceitos {', '.join(ENGINES)}")
     return {
         "qiime2_image": image.strip(),
         "silva_classifier": silva.strip(),
@@ -130,7 +130,7 @@ def run_merge(ws: Workspace, *, runner: Runner = subprocess_runner) -> dict[str,
             {
                 "run": "merge",
                 "stage": "merge",
-                "reason": "regiões diferentes entre corridas; registre decisão com `sentinel decide merge`",
+                "reason": "regiões diferentes entre corridas; registre decisão com `amplisentinel decide merge`",
                 "regions_by_run": regions_by_run,
                 "manifest": {"path": str(manifest_path), "sha256": m_sha},
             },

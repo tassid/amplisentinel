@@ -4,9 +4,9 @@ import json
 import re
 from pathlib import Path
 
-from sentinel import between
-from sentinel.cli import main
-from sentinel.workspace import Workspace
+from amplisentinel import between
+from amplisentinel.cli import main
+from amplisentinel.workspace import Workspace
 
 
 def _write_between_inputs(tmp_path: Path) -> tuple[Path, Path]:

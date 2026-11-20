@@ -48,8 +48,8 @@ _THREAD_LOCK = threading.Lock()
 def _exclusive(lock_path: Path):
     """Cross-process lock around read-last-hash + append.
 
-    Several processes write the same ledger (for example `sentinel run` and
-    `sentinel listen` or `sentinel ui`). Without this lock two events could
+    Several processes write the same ledger (for example `amplisentinel run` and
+    `amplisentinel listen` or `amplisentinel ui`). Without this lock two events could
     point to the same previous hash and break the chain.
     """
     with _THREAD_LOCK:
@@ -105,11 +105,11 @@ class Ledger:
                     last = line
         return json.loads(last)["hash"] if last else GENESIS
 
-    def append(self, event: str, data: dict | None = None, actor: str = "sentinel") -> dict:
-        """Append one event. `actor` is "sentinel" for automatic events and
+    def append(self, event: str, data: dict | None = None, actor: str = "amplisentinel") -> dict:
+        """Append one event. `actor` is "amplisentinel" for automatic events and
         "human" for decisions typed by the researcher."""
-        if actor not in {"sentinel", "human"}:
-            raise ValueError("actor must be 'sentinel' or 'human'")
+        if actor not in {"amplisentinel", "human"}:
+            raise ValueError("actor must be 'amplisentinel' or 'human'")
         commit = git_commit(self.path.parent)
         with _exclusive(self.path.with_name(self.path.name + ".lock")):
             body = {

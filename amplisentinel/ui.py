@@ -1,8 +1,8 @@
 """Local browser interface for one workspace.
 
-`sentinel ui` serves pages on 127.0.0.1 only. Pages show the same data as
-`sentinel show` and the MCP server (values, states, paths, sha256). Buttons run
-the same `sentinel` commands as the terminal, one at a time, in a separate
+`amplisentinel ui` serves pages on 127.0.0.1 only. Pages show the same data as
+`amplisentinel show` and the MCP server (values, states, paths, sha256). Buttons run
+the same `amplisentinel` commands as the terminal, one at a time, in a separate
 process, so every refusal and every ledger event is identical to the CLI.
 
 Safety:
@@ -46,7 +46,7 @@ from .workspace import Workspace
 DEFAULT_PORT = 8800
 HOST = "127.0.0.1"
 
-# Workspace level buttons: label, argv after `sentinel -w <ws>`.
+# Workspace level buttons: label, argv after `amplisentinel -w <ws>`.
 WS_ACTIONS: dict[str, tuple[str, list[str]]] = {
     "init": ("init", ["init"]),
     "inventory": ("inventory", ["inventory"]),
@@ -112,7 +112,7 @@ def default_launcher(argv: list[str], log_path: Path) -> subprocess.Popen:
     fh = log_path.open("wb")
     try:
         return subprocess.Popen(
-            [sys.executable, "-m", "sentinel.cli", *argv],
+            [sys.executable, "-m", "amplisentinel.cli", *argv],
             stdout=fh,
             stderr=subprocess.STDOUT,
             stdin=subprocess.DEVNULL,
@@ -123,7 +123,7 @@ def default_launcher(argv: list[str], log_path: Path) -> subprocess.Popen:
 
 
 class JobManager:
-    """Runs one `sentinel` command at a time for one workspace."""
+    """Runs one `amplisentinel` command at a time for one workspace."""
 
     def __init__(self, ws: Workspace, launcher: Callable[[list[str], Path], Any] = default_launcher):
         self.ws = ws
@@ -152,7 +152,7 @@ class JobManager:
             job = Job(id=job_id, argv=argv, log_path=log_path, started=utc_iso())
             self.ws.ledger.append(
                 "ui_command",
-                {"job": job_id, "argv": ["sentinel", *argv], "log": str(log_path), "run": _run_of(args)},
+                {"job": job_id, "argv": ["amplisentinel", *argv], "log": str(log_path), "run": _run_of(args)},
                 actor="human",
             )
             job.proc = self.launcher(argv, log_path)
@@ -168,7 +168,7 @@ class JobManager:
                 "ui_command_finished",
                 {
                     "job": job.id,
-                    "argv": ["sentinel", *job.argv],
+                    "argv": ["amplisentinel", *job.argv],
                     "exit_code": code,
                     "log": {"path": str(job.log_path), "sha256": sha},
                     "run": _run_of(job.argv[2:]),
@@ -262,8 +262,8 @@ def _page(ws: Workspace, title: str, body: str, refresh: bool = False) -> str:
     meta = '<meta http-equiv="refresh" content="3">' if refresh else ""
     return (
         "<!doctype html><html lang=\"pt-BR\"><head><meta charset=\"utf-8\">"
-        f"{meta}<title>{_esc(title)} | Sentinel {_esc(ws.name)}</title><style>{CSS}</style></head><body>"
-        f"<header><b>Sentinel</b><span>{_esc(ws.name)}</span>"
+        f"{meta}<title>{_esc(title)} | AmpliSentinel {_esc(ws.name)}</title><style>{CSS}</style></head><body>"
+        f"<header><b>AmpliSentinel</b><span>{_esc(ws.name)}</span>"
         '<a href="/">corridas</a><a href="/ledger">ledger</a><a href="/jobs">comandos</a>'
         '<a href="/report">relatório</a>'
         f'<span style="margin-left:auto;font-size:12px">v{_esc(__version__)} 127.0.0.1</span></header>'
@@ -290,7 +290,7 @@ def _running_note(jobs: JobManager) -> str:
         return ""
     return (
         f'<p class="msg">em execução: <a href="/job/{_esc(j.id)}">{_esc(j.id)}</a> '
-        f"<code>sentinel {_esc(' '.join(j.argv[2:]))}</code></p>"
+        f"<code>amplisentinel {_esc(' '.join(j.argv[2:]))}</code></p>"
     )
 
 
@@ -412,7 +412,7 @@ def page_jobs(ws: Workspace, jobs: JobManager) -> str:
     with jobs.lock:
         items = list(reversed(jobs.jobs))
     rows = "".join(
-        f'<tr><td><a href="/job/{_esc(j.id)}">{_esc(j.id)}</a></td><td><code>sentinel {_esc(" ".join(j.argv[2:]))}</code></td>'
+        f'<tr><td><a href="/job/{_esc(j.id)}">{_esc(j.id)}</a></td><td><code>amplisentinel {_esc(" ".join(j.argv[2:]))}</code></td>'
         f"<td>{_esc(j.status)}</td><td>{_esc(j.exit_code)}</td></tr>"
         for j in items
     )
@@ -428,7 +428,7 @@ def page_job(ws: Workspace, job: Job) -> str:
     data = job.log_path.read_bytes() if job.log_path.exists() else b""
     text = data[-200_000:].decode("utf-8", errors="replace")
     body = (
-        f"<p><code>sentinel {_esc(' '.join(job.argv))}</code></p>"
+        f"<p><code>amplisentinel {_esc(' '.join(job.argv))}</code></p>"
         f"<p>situação: {_esc(job.status)}  código de saída: {_esc(job.exit_code)}  "
         f"início: {_esc(job.started)}  fim: {_esc(job.finished)}</p>"
         f"<h3>saída</h3><pre>{_esc(text)}</pre>"
@@ -469,7 +469,7 @@ class UiServer(ThreadingHTTPServer):
 
 class Handler(BaseHTTPRequestHandler):
     server: UiServer
-    server_version = "SentinelUI"
+    server_version = "AmpliSentinelUI"
 
     def log_message(self, fmt: str, *args: Any) -> None:  # quiet
         return
@@ -560,7 +560,7 @@ class Handler(BaseHTTPRequestHandler):
 def serve(ws: Workspace, port: int = DEFAULT_PORT, open_browser: bool = True,
           with_listener: bool = True) -> None:
     srv = UiServer(ws, port)
-    print(f"Sentinel UI: {srv.url}  workspace={ws.name}  (Ctrl+C para parar)", flush=True)
+    print(f"AmpliSentinel UI: {srv.url}  workspace={ws.name}  (Ctrl+C para parar)", flush=True)
     weblog = None
     if with_listener:
         try:

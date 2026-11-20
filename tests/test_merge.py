@@ -5,10 +5,10 @@ from pathlib import Path
 
 import pytest
 
-from sentinel import merge
-from sentinel.cli import main
-from sentinel.ext import CallResult
-from sentinel.workspace import Workspace
+from amplisentinel import merge
+from amplisentinel.cli import main
+from amplisentinel.ext import CallResult
+from amplisentinel.workspace import Workspace
 
 QIIME_IMAGE = "quay.io/qiime2/amplicon:2024.10@sha256:" + "e" * 64
 
@@ -35,7 +35,7 @@ def _setup_merge_ws(tmp_path: Path, *, regions: tuple[str, str] = ("V4", "V4"), 
     silva.write_bytes(b"silva-classifier-bytes")
     silva_md5 = "0" * 32 if bad_md5 else hashlib.md5(silva.read_bytes()).hexdigest()
 
-    (ws.root / "sentinel.yaml").write_text(
+    (ws.root / "amplisentinel.yaml").write_text(
         f"name: cervical\ntitle: cervical\nmerge:\n  qiime2_image: '{QIIME_IMAGE}'\n  silva_classifier: silva-138.qza\n  silva_md5: '{silva_md5}'\n",
         encoding="utf-8",
     )
@@ -65,7 +65,7 @@ def test_different_regions_block_until_human_decide_merge(tmp_path):
     assert blocked["regions_by_run"] == {"P1": "V4", "P2": "V3-V4"}
     assert tools.calls == []
 
-    # Researcher records strategy via `sentinel decide merge "..."`
+    # Researcher records strategy via `amplisentinel decide merge "..."`
     strategy = "trim to common V4 region before merging"
     assert main(["-w", str(ws.root), "decide", "merge", strategy]) == 0
 

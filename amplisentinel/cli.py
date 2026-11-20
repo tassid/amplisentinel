@@ -1,7 +1,7 @@
 """Command line interface.
 
 Every command acts on one workspace (one research project), chosen with
---workspace, the SENTINEL_WORKSPACE variable, or the current folder.
+--workspace, the AMPLISENTINEL_WORKSPACE variable, or the current folder.
 
 Output rule: every command prints data (values, states, file paths, hashes).
 No command prints recommendations.
@@ -203,7 +203,7 @@ def cmd_serve_all(args) -> int:
 
 def cmd_launchd(args) -> int:
     ws = _ws(args)
-    plist = serve_all.render_launchd_plist(ws, port=args.port, sentinel_bin=args.sentinel_bin)
+    plist = serve_all.render_launchd_plist(ws, port=args.port, amplisentinel_bin=args.amplisentinel_bin)
     if args.out:
         out = Path(args.out)
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -395,13 +395,13 @@ def cmd_ui(args) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(prog="sentinel", description=__doc__)
+    p = argparse.ArgumentParser(prog="amplisentinel", description=__doc__)
     p.add_argument("--version", action="version", version=__version__)
     p.add_argument(
         "-w",
         "--workspace",
-        default=os.environ.get("SENTINEL_WORKSPACE", "."),
-        help="pasta do projeto (padrão: SENTINEL_WORKSPACE ou a pasta atual)",
+        default=os.environ.get("AMPLISENTINEL_WORKSPACE", "."),
+        help="pasta do projeto (padrão: AMPLISENTINEL_WORKSPACE ou a pasta atual)",
     )
     sub = p.add_subparsers(dest="cmd", required=True)
 
@@ -447,7 +447,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--trim-length", type=int, default=None,
                    help="comprimento de corte para Deblur (ou deblur.trim_length em rules.yaml)")
     s.add_argument("--weblog-port", type=int, default=None,
-                   help="porta local de -with-weblog (padrão: sentinel.yaml ou 8765)")
+                   help="porta local de -with-weblog (padrão: amplisentinel.yaml ou 8765)")
     s.set_defaults(func=cmd_run)
 
     s = sub.add_parser("listen", help="escuta eventos -with-weblog do Nextflow em 127.0.0.1")
@@ -531,13 +531,13 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--port", type=int, default=8701)
     s.set_defaults(func=cmd_mcp)
 
-    s = sub.add_parser("serve-all", help="sobe um servidor MCP por workspace listado em ~/.sentinel/workspaces.yaml")
+    s = sub.add_parser("serve-all", help="sobe um servidor MCP por workspace listado em ~/.amplisentinel/workspaces.yaml")
     s.add_argument("--config", help="caminho alternativo para workspaces.yaml")
     s.set_defaults(func=cmd_serve_all)
 
     s = sub.add_parser("launchd", help="gera plist do launchd (macOS) para o servidor MCP do workspace")
     s.add_argument("--port", type=int, default=8701)
-    s.add_argument("--sentinel-bin", default="sentinel")
+    s.add_argument("--amplisentinel-bin", default="amplisentinel")
     s.add_argument("--out")
     s.set_defaults(func=cmd_launchd)
 
@@ -549,7 +549,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--port", type=int, default=8800)
     s.add_argument("--no-browser", action="store_true", help="não abre o navegador automaticamente")
     s.add_argument("--no-listen", action="store_true",
-                   help="não inicia o receptor weblog do Nextflow (use se `sentinel listen` já estiver rodando)")
+                   help="não inicia o receptor weblog do Nextflow (use se `amplisentinel listen` já estiver rodando)")
     s.set_defaults(func=cmd_ui)
 
     args = p.parse_args(argv)

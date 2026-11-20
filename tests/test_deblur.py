@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from sentinel import deblur, run
-from sentinel.cli import main
-from sentinel.ext import CallResult
-from sentinel.rules import ConfigError, parse_rules
+from amplisentinel import deblur, run
+from amplisentinel.cli import main
+from amplisentinel.ext import CallResult
+from amplisentinel.rules import ConfigError, parse_rules
 from tests.test_run import FakeRunTools, make_ready_ws
 
 QIIME_DIGEST_IMAGE = "quay.io/qiime2/amplicon:2024.10@sha256:" + "c" * 64

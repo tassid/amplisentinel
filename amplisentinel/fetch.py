@@ -1,11 +1,11 @@
 """Fetch worker: download the FASTQ files of one run and check them against ENA.
 
-`sentinel fetch <RUN>`:
+`amplisentinel fetch <RUN>`:
 
 1. Reads the run's accessions and the ENA records (official FASTQ names, MD5
-   and sizes; cached in .sentinel/inventory/ena_cache.json).
+   and sizes; cached in .amplisentinel/inventory/ena_cache.json).
 2. Checks free disk space: bytes still to download x `fetch.disk_slack`
-   (sentinel.yaml). Too little space refuses the fetch with no state change.
+   (amplisentinel.yaml). Too little space refuses the fetch with no state change.
 3. Moves the run PENDING -> FETCHING (a run already in FETCHING is resumed).
 4. Gets each file into <workspace>/runs/<RUN>/fastq/:
    - from Google Drive with `rclone copyto gdrive_ro:...` when the run has a
@@ -13,7 +13,7 @@
    - otherwise from ENA over HTTPS, into `<file>.part`, resumed with an HTTP
      Range request when the .part file already exists;
    - or, with `--via fetchngs`, with nf-core/fetchngs at the release pinned in
-     sentinel.yaml. Sentinel still checks every MD5 against ENA.
+     amplisentinel.yaml. AmpliSentinel still checks every MD5 against ENA.
 5. Computes the local MD5 of every file and compares it with ENA.
    All equal -> MD5_OK. Any difference or failure -> BLOCKED, with an `error`
    event listing the files and the literal error logs.
@@ -82,23 +82,23 @@ class FetchSettings:
 
 
 def settings(ws: Workspace) -> FetchSettings:
-    """Fetch settings from sentinel.yaml. Unknown keys in `fetch` are refused."""
+    """Fetch settings from amplisentinel.yaml. Unknown keys in `fetch` are refused."""
     meta = ws.meta
     block = meta.get("fetch") or {}
     if not isinstance(block, dict):
-        raise ConfigError("sentinel.yaml: 'fetch' precisa ser um mapa")
+        raise ConfigError("amplisentinel.yaml: 'fetch' precisa ser um mapa")
     unknown = sorted(str(k) for k in block if k not in FETCH_KEYS)
     if unknown:
-        raise ConfigError(f"sentinel.yaml fetch: chave desconhecida {unknown}; aceitas: {', '.join(FETCH_KEYS)}")
+        raise ConfigError(f"amplisentinel.yaml fetch: chave desconhecida {unknown}; aceitas: {', '.join(FETCH_KEYS)}")
     slack = block.get("disk_slack", DEFAULT_DISK_SLACK)
     if isinstance(slack, bool) or not isinstance(slack, (int, float)) or slack < 1:
-        raise ConfigError("sentinel.yaml fetch.disk_slack: esperado número >= 1")
+        raise ConfigError("amplisentinel.yaml fetch.disk_slack: esperado número >= 1")
     release = block.get("fetchngs_release")
     if release is not None and (not isinstance(release, str) or not release.strip()):
-        raise ConfigError("sentinel.yaml fetch.fetchngs_release: esperado texto")
+        raise ConfigError("amplisentinel.yaml fetch.fetchngs_release: esperado texto")
     engine = meta.get("container_engine", "docker")
     if engine not in ENGINES:
-        raise ConfigError(f"sentinel.yaml container_engine: aceitos {', '.join(ENGINES)}")
+        raise ConfigError(f"amplisentinel.yaml container_engine: aceitos {', '.join(ENGINES)}")
     return FetchSettings(float(slack), release, engine)
 
 
@@ -261,11 +261,11 @@ def run_fetch(
         raise FetchRefused(f"corrida {run}: --source drive sem drive_path em config/runs.yaml")
     cfg = settings(ws)
     if via == "fetchngs" and not cfg.fetchngs_release:
-        raise FetchRefused("--via fetchngs exige fetch.fetchngs_release em sentinel.yaml (release travada)")
+        raise FetchRefused("--via fetchngs exige fetch.fetchngs_release em amplisentinel.yaml (release travada)")
 
     current = ws.state.get(run)
     if current == "BLOCKED":
-        raise FetchRefused(f"{run} está em BLOCKED; sair de BLOCKED exige `sentinel move {run} FETCHING -j`")
+        raise FetchRefused(f"{run} está em BLOCKED; sair de BLOCKED exige `amplisentinel move {run} FETCHING -j`")
     if current not in ("PENDING", "FETCHING"):
         raise FetchRefused(f"{run} está em {current}; fetch só roda em PENDING ou FETCHING")
 

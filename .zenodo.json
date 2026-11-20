@@ -1,5 +1,5 @@
 {
-  "title": "Sentinel: auditable experiment manager for multi-run amplicon processing",
+  "title": "AmpliSentinel: auditable experiment manager for multi-run amplicon processing",
   "upload_type": "software",
   "license": "BSD-3-Clause",
   "creators": [

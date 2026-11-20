@@ -42,7 +42,7 @@ def workspace_info(ws: Workspace) -> dict:
         "title": meta.get("title"),
         "description": meta.get("description"),
         "runs_configured": ws.configured_runs(),
-        "sources": [_source(ws.root / "sentinel.yaml"), _source(ws.runs_file)],
+        "sources": [_source(ws.root / "amplisentinel.yaml"), _source(ws.runs_file)],
     }
 
 

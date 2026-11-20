@@ -3,16 +3,16 @@
 Layout:
 
   <workspace>/
-    sentinel.yaml            name, title, description
+    amplisentinel.yaml            name, title, description
     config/runs.yaml         sequencing runs of this project
     config/rules.yaml        thresholds written by the researcher
     data/accessions/         <STUDY>_runs.txt accession lists
-    .sentinel/ledger.jsonl   hash-chained ledger (never edited by hand)
-    .sentinel/state.json     state of each run
-    .sentinel/inventory/     inventory tables and ENA cache
-    .sentinel/metrics/       <RUN>.json metrics written by `measure`
+    .amplisentinel/ledger.jsonl   hash-chained ledger (never edited by hand)
+    .amplisentinel/state.json     state of each run
+    .amplisentinel/inventory/     inventory tables and ENA cache
+    .amplisentinel/metrics/       <RUN>.json metrics written by `measure`
 
-Everything Sentinel reads or writes for a project stays inside its workspace.
+Everything AmpliSentinel reads or writes for a project stays inside its workspace.
 """
 
 from __future__ import annotations
@@ -45,18 +45,18 @@ class Workspace:
     @classmethod
     def open(cls, path: str | Path) -> Workspace:
         root = Path(path).expanduser().resolve()
-        if not (root / "sentinel.yaml").exists():
-            raise WorkspaceError(f"não é um workspace do Sentinel (falta sentinel.yaml): {root}")
+        if not (root / "amplisentinel.yaml").exists():
+            raise WorkspaceError(f"não é um workspace do AmpliSentinel (falta amplisentinel.yaml): {root}")
         return cls(root)
 
     @classmethod
     def create(cls, path: str | Path, name: str, title: str | None = None) -> Workspace:
         root = Path(path).expanduser().resolve()
-        if (root / "sentinel.yaml").exists():
+        if (root / "amplisentinel.yaml").exists():
             raise WorkspaceError(f"já existe um workspace em {root}")
         (root / "config").mkdir(parents=True, exist_ok=True)
         (root / "data" / "accessions").mkdir(parents=True, exist_ok=True)
-        (root / "sentinel.yaml").write_text(
+        (root / "amplisentinel.yaml").write_text(
             yaml.safe_dump({"name": name, "title": title or name, "description": ""}, sort_keys=False),
             encoding="utf-8",
         )
@@ -68,7 +68,7 @@ class Workspace:
 
     @property
     def meta(self) -> dict:
-        return yaml.safe_load((self.root / "sentinel.yaml").read_text(encoding="utf-8")) or {}
+        return yaml.safe_load((self.root / "amplisentinel.yaml").read_text(encoding="utf-8")) or {}
 
     @property
     def name(self) -> str:
@@ -76,7 +76,7 @@ class Workspace:
 
     @property
     def home(self) -> Path:
-        return self.root / ".sentinel"
+        return self.root / ".amplisentinel"
 
     @property
     def ledger(self) -> Ledger:

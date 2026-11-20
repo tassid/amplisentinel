@@ -1,4 +1,4 @@
-name: sentinel
+name: amplisentinel
 channels:
   - conda-forge
 dependencies:

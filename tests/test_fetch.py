@@ -8,12 +8,12 @@ from pathlib import Path
 
 import pytest
 
-from sentinel import fetch
-from sentinel.cli import main
-from sentinel.ext import CallResult
-from sentinel.runs import ConfigError
-from sentinel.state import TransitionError
-from sentinel.workspace import Workspace
+from amplisentinel import fetch
+from amplisentinel.cli import main
+from amplisentinel.ext import CallResult
+from amplisentinel.runs import ConfigError
+from amplisentinel.state import TransitionError
+from amplisentinel.workspace import Workspace
 
 CONTENT = {
     "SRR1_1.fastq.gz": b"@r1\nACGT\n+\nIIII\n" * 50,
@@ -104,7 +104,7 @@ def make_ws(tmp_path, drive_path=None, meta_extra="") -> Workspace:
     )
     (ws.accessions_dir / "S1_runs.txt").write_text("SRR1\n", encoding="utf-8")
     if meta_extra:
-        with (ws.root / "sentinel.yaml").open("a", encoding="utf-8") as fh:
+        with (ws.root / "amplisentinel.yaml").open("a", encoding="utf-8") as fh:
             fh.write(meta_extra)
     ws.state.register(ws.configured_runs())
     return ws

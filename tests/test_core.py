@@ -2,9 +2,9 @@ import json
 
 import pytest
 
-from sentinel import inventory as inv
-from sentinel.ledger import Ledger
-from sentinel.state import RunState, TransitionError
+from amplisentinel import inventory as inv
+from amplisentinel.ledger import Ledger
+from amplisentinel.state import RunState, TransitionError
 
 
 def test_ledger_chain_and_tamper(tmp_path):
