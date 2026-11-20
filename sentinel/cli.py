@@ -14,7 +14,7 @@ import json
 import os
 import sys
 
-from . import __version__, fetch, reconcile
+from . import __version__, deblur, fetch, reconcile
 from . import inventory as inv
 from . import queries as q
 from . import run as run_worker
@@ -116,6 +116,17 @@ def cmd_fetch(args) -> int:
 
 def cmd_run(args) -> int:
     ws = _ws(args)
+    if args.denoiser == "deblur":
+        try:
+            res = deblur.run_deblur(ws, args.run, trim_length=args.trim_length)
+        except run_worker.RunRefused as exc:
+            print(f"recusado: {exc}", file=sys.stderr)
+            return 2
+        print(f"{ws.name}/{res['run']} ({res['experiment_id']}) -> {res['status']}")
+        if res.get("error_log"):
+            print(f"erro literal: {res['error_log']['path']}  sha256={res['error_log']['sha256'][:16]}")
+        print(f"{res['manifest']['path']}  sha256={res['manifest']['sha256'][:16]}")
+        return 0 if res["status"] == "COMPLETED" else 1
     try:
         res = run_worker.run_ampliseq(ws, args.run, weblog_port=args.weblog_port)
     except run_worker.RunRefused as exc:
@@ -211,8 +222,12 @@ def main(argv: list[str] | None = None) -> int:
                    help="auto: Drive quando o arquivo está lá, senão ENA")
     s.set_defaults(func=cmd_fetch)
 
-    s = sub.add_parser("run", help="executa nf-core/ampliseq para uma corrida")
+    s = sub.add_parser("run", help="executa nf-core/ampliseq (ou Deblur) para uma corrida")
     s.add_argument("run")
+    s.add_argument("--denoiser", choices=["dada2", "deblur"], default="dada2",
+                   help="dada2: nf-core/ampliseq (padrão); deblur: experimento separado no QIIME 2")
+    s.add_argument("--trim-length", type=int, default=None,
+                   help="comprimento de corte para Deblur (ou deblur.trim_length em rules.yaml)")
     s.add_argument("--weblog-port", type=int, default=None,
                    help="porta local de -with-weblog (padrão: sentinel.yaml ou 8765)")
     s.set_defaults(func=cmd_run)

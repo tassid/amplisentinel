@@ -27,6 +27,7 @@ documented here when their stage lands.
 | `fetch_completed` | `sentinel fetch` | `run`, `manifest` (path and sha256 of `fetch_manifest.json`), `files`, `equal`, `result` (`MD5_OK` or `BLOCKED`) |
 | `environment` | `sentinel run` | `run`, `ampliseq_release`, `nextflow_version`, `container_engine`, `container_engine_version`, `docker_version`, `colima_version`, `vm_config` (`name`, `status`, `vmType`, `rosetta`), `images` (list of `image`, `digest`), `conda_env` (`available`, `path`, `sha256` or `exit_code`/`stderr`), `samplesheet` and `params` (path and sha256) |
 | `run_completed` | `sentinel run` | `run`, `result` (`PROCESSING` or `BLOCKED`), `manifest` (path and sha256 of `run_manifest.json`), `outdir`, `images`, `artifacts` (trace/report/timeline/nextflow_log paths and sha256), or `error_log` when `BLOCKED` |
+| `experiment_recorded` | `sentinel run --denoiser deblur` | `run`, `experiment_id`, `denoiser` (`deblur`), `status` (`COMPLETED` or `FAILED`), `qiime2_image`, `parameters`, `artifacts` (paths and sha256), `experiment` (path and sha256 of `experiment.json`), `mlflow`, or `error_log` |
 
 ## Notes
 
@@ -71,4 +72,5 @@ documented here when their stage lands.
 | `fetch.fetchngs_release` | nf-core/fetchngs release for `--via fetchngs`; required for that option |
 | `run.ampliseq_release` | nf-core/ampliseq release passed via `-r` (default `3.1.0`) |
 | `run.weblog_port` | local port for Nextflow `-with-weblog http://127.0.0.1:<port>/events` (default `8765`) |
+| `run.qiime2_image` | digest-pinned QIIME 2 image (`...@sha256:...`) required for `--denoiser deblur` |
 | `container_engine` | `docker` (default) or `podman`, passed as `-profile` |
