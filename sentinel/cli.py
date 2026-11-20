@@ -27,6 +27,7 @@ from . import (
     ml,
     publish,
     reconcile,
+    report,
     serve_all,
 )
 from . import inventory as inv
@@ -210,6 +211,14 @@ def cmd_launchd(args) -> int:
         print(f"plist salvo: {out}")
     else:
         print(plist, end="")
+    return 0
+
+
+def cmd_report(args) -> int:
+    ws = _ws(args)
+    res = report.generate_report(ws, out_path=Path(args.out) if args.out else None)
+    print(f"relatório: {res['output']['path']}  sha256={res['output']['sha256'][:16]}")
+    print(f"corridas={res['runs']}  decisões={res['decisions']}  qzv={res['qzv_count']}")
     return 0
 
 
@@ -523,6 +532,10 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--sentinel-bin", default="sentinel")
     s.add_argument("--out")
     s.set_defaults(func=cmd_launchd)
+
+    s = sub.add_parser("report", help="gera relatório HTML estático determinístico do workspace")
+    s.add_argument("--out")
+    s.set_defaults(func=cmd_report)
 
     args = p.parse_args(argv)
     try:
