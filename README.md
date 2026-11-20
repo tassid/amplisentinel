@@ -56,6 +56,7 @@ move to the next. Sentinel makes that loop reproducible and auditable:
 | ML bridge (export, LOPO folds, Random Forest, SHAP, MLflow) | working |
 | MCP server (read only, 13 tools, serve-all, launchd) | working |
 | report (deterministic static HTML report) | working |
+| Browser dashboard (`sentinel ui`, 127.0.0.1, follows and runs commands) | working |
 | Workspaces (one per research project) | working |
 | CI and release packaging (`CITATION.cff`, `CHANGELOG.md`, workflow) | working |
 
@@ -97,6 +98,31 @@ New project:
 ```bash
 sentinel new ~/pesquisa/rice --name rice --title "Rice microbiome"
 ```
+
+## Browser dashboard
+
+```bash
+pipx install git+https://github.com/tassid/sentinel.git   # or: pip install -e .
+sentinel -w workspaces/cervical-cancer ui                 # opens http://127.0.0.1:8800/
+```
+
+- Runs on the same computer as the pipeline (macOS, Linux or Windows). Listens on
+  127.0.0.1 only and refuses any other Host header.
+- Pages: runs and states, one page per run (state, Nextflow process events,
+  metrics with the rules in use, errors, ledger events), ledger with `verify`,
+  commands started, and the HTML report.
+- Buttons run the same `sentinel` commands as the terminal, one at a time, in a
+  separate process. Refusals are identical. Each command is recorded in the
+  ledger as `ui_command` (actor `human`) and `ui_command_finished` (exit code and
+  sha256 of the output log under `.sentinel/ui/jobs/`).
+- `move` and `decide` take the text typed by the researcher. `clean` needs a
+  confirmation box.
+- The Nextflow weblog receiver (same as `sentinel listen`) starts with the
+  dashboard on `run.weblog_port`, so process events appear while `run` works.
+  Use `--no-listen` when `sentinel listen` is already running, `--no-browser`
+  to not open the browser, `--port` to change 8800.
+- Every POST carries a random token created at start; a page from any other site
+  cannot trigger a command.
 
 ## Conversational interface (OpenBot)
 
