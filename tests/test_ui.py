@@ -153,3 +153,10 @@ def test_port_in_use_is_refused(tmp_path):
             ui.UiServer(ws, first.port)
     finally:
         first.server_close()
+
+
+def test_mascot_in_header_and_favicon(server):
+    status, _, body = _req(server, "GET", "/")
+    assert status == 200
+    assert body.count("data:image/svg+xml;base64,") == 2
+    assert ui.MASCOT.startswith("data:image/svg+xml;base64,")

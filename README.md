@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/assets/amplisentinel-mascote.svg" alt="AmpliSentinel mascot: a capybara holding a shield with a DNA double helix" width="200"></p>
+
 # AmpliSentinel
 
 **Auditable experiment manager for multi-run amplicon processing.**

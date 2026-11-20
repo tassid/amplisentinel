@@ -61,7 +61,7 @@ def test_no_em_or_en_dashes_in_code_or_docs():
         ROOT / "environment.yml",
     ]
     for p in paths:
-        if p.is_file():
+        if p.is_file() and p.suffix.lower() not in {".png", ".jpg", ".jpeg", ".gif", ".ico"}:
             text = p.read_text(encoding="utf-8")
             assert "\u2014" not in text, f"em dash found in {p}"
             assert "\u2013" not in text, f"en dash found in {p}"
