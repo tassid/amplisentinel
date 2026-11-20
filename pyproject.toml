@@ -27,3 +27,6 @@ amplisentinel = "amplisentinel.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["amplisentinel*"]
+
+[tool.setuptools.package-data]
+amplisentinel = ["assets/*.svg"]

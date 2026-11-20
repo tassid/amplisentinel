@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>AmpliSentinel: capivara sentinela</title>
+  <defs>
+    <linearGradient id="fur" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#A26C45"/>
+      <stop offset="1" stop-color="#8A5A37"/>
+    </linearGradient>
+    <linearGradient id="head" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9A6640"/>
+      <stop offset="1" stop-color="#AE7A50"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3B6BE0"/>
+      <stop offset="1" stop-color="#2447A8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- fundo -->
+  <circle cx="256" cy="256" r="244" fill="#E7F3EF"/>
+  <circle cx="256" cy="256" r="244" fill="none" stroke="#1D2433" stroke-width="8"/>
+  <ellipse cx="256" cy="462" rx="140" ry="14" fill="#1D2433" opacity="0.14"/>
+
+  <!-- corpo sentado -->
+  <path d="M256 230 C 338 230, 382 300, 384 372 C 386 432, 346 456, 256 456
+           C 166 456, 126 432, 128 372 C 130 300, 174 230, 256 230 Z" fill="url(#fur)"/>
+  <path d="M256 272 C 304 272, 328 320, 330 372 C 332 422, 304 440, 256 440
+           C 208 440, 180 422, 182 372 C 184 320, 208 272, 256 272 Z" fill="#B98559"/>
+  <g stroke="#7A4F31" stroke-width="3" stroke-linecap="round" opacity="0.5">
+    <path d="M152 330 l 8 -8 M 146 372 l 8 -8 M 160 410 l 8 -8 M 352 322 l -8 -8 M 360 364 l -8 -8 M 350 406 l -8 -8"/>
+  </g>
+
+  <!-- patas traseiras -->
+  <ellipse cx="184" cy="452" rx="44" ry="15" fill="#6E4529"/>
+  <ellipse cx="328" cy="452" rx="44" ry="15" fill="#6E4529"/>
+  <path d="M158 452 v 8 M 174 454 v 8 M 190 454 v 8 M 322 454 v 8 M 338 454 v 8 M 354 452 v 8" stroke="#4A2F1E" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- escudo com dupla hélice -->
+  <path d="M256 280 L 322 300 C 322 364, 302 402, 256 426 C 210 402, 190 364, 190 300 Z"
+        fill="url(#shield)" stroke="#1D2433" stroke-width="6" stroke-linejoin="round"/>
+  <g fill="none" stroke-linecap="round">
+    <g stroke="#FFFFFF" stroke-width="4" opacity="0.9">
+      <line x1="242" y1="315" x2="270" y2="315"/>
+      <line x1="242" y1="341" x2="270" y2="341"/>
+      <line x1="242" y1="367" x2="270" y2="367"/>
+      <line x1="242" y1="393" x2="270" y2="393"/>
+    </g>
+    <path d="M256 302 C 234 309, 234 321, 256 328 C 278 335, 278 347, 256 354 C 234 361, 234 373, 256 380 C 278 387, 278 399, 256 406" stroke="#9FD8C6" stroke-width="7"/>
+    <path d="M256 302 C 278 309, 278 321, 256 328 C 234 335, 234 347, 256 354 C 278 361, 278 373, 256 380 C 234 387, 234 399, 256 406" stroke="#FFFFFF" stroke-width="7"/>
+  </g>
+
+  <!-- patas dianteiras segurando o escudo -->
+  <path d="M196 262 C 174 292, 176 320, 198 334" fill="none" stroke="#8A5A37" stroke-width="30" stroke-linecap="round"/>
+  <path d="M316 262 C 338 292, 336 320, 314 334" fill="none" stroke="#8A5A37" stroke-width="30" stroke-linecap="round"/>
+  <ellipse cx="200" cy="334" rx="17" ry="13" fill="#6E4529"/>
+  <ellipse cx="312" cy="334" rx="17" ry="13" fill="#6E4529"/>
+
+  <!-- orelhas pequenas nos cantos de cima -->
+  <ellipse cx="196" cy="72" rx="14" ry="12" fill="#6E4529"/>
+  <ellipse cx="316" cy="72" rx="14" ry="12" fill="#6E4529"/>
+  <ellipse cx="197" cy="74" rx="7" ry="5.5" fill="#4A2F1E"/>
+  <ellipse cx="315" cy="74" rx="7" ry="5.5" fill="#4A2F1E"/>
+
+  <!-- cabeça alta, rosto comprido -->
+  <path d="M256 60 C 302 60, 326 76, 328 106 L 334 214 C 336 248, 304 266, 256 266
+           C 208 266, 176 248, 178 214 L 184 106 C 186 76, 210 60, 256 60 Z" fill="url(#head)"/>
+  <g stroke="#7A4F31" stroke-width="3" stroke-linecap="round" opacity="0.5">
+    <path d="M236 78 l 4 10 M 256 74 v 11 M 276 78 l -4 10"/>
+  </g>
+
+  <!-- focinho largo e quadrado -->
+  <path d="M256 150 C 300 150, 326 160, 330 182 L 333 216 C 335 248, 304 266, 256 266
+           C 208 266, 177 248, 179 216 L 182 182 C 186 160, 212 150, 256 150 Z" fill="#83552F"/>
+  <!-- nariz grande no alto do focinho -->
+  <path d="M216 170 C 226 154, 286 154, 296 170 C 300 184, 286 192, 256 192 C 226 192, 212 184, 216 170 Z" fill="#2E211A"/>
+  <path d="M230 170 Q 236 177 243 172 M 269 172 Q 276 177 282 170" fill="none" stroke="#6B5141" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- boca -->
+  <path d="M256 192 L 256 214 M 230 222 Q 243 230 256 214 Q 269 230 282 222" fill="none" stroke="#2E211A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- olhos pequenos, altos e nas laterais -->
+  <circle cx="204" cy="114" r="8" fill="#1D2433"/>
+  <circle cx="308" cy="114" r="8" fill="#1D2433"/>
+  <circle cx="206.5" cy="111.5" r="2.6" fill="#FFFFFF"/>
+  <circle cx="310.5" cy="111.5" r="2.6" fill="#FFFFFF"/>
+  <!-- bochechas -->
+  <ellipse cx="200" cy="140" rx="10" ry="6" fill="#D98E73" opacity="0.4"/>
+  <ellipse cx="312" cy="140" rx="10" ry="6" fill="#D98E73" opacity="0.4"/>
+</svg>

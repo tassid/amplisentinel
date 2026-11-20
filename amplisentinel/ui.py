@@ -20,6 +20,7 @@ Nothing here interprets results or recommends a next step.
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import html
 import json
@@ -66,6 +67,17 @@ RUN_ACTIONS: dict[str, tuple[str, list[str]]] = {
     "publish": ("publish", ["publish", "{run}"]),
     "clean": ("clean", ["clean", "{run}"]),
 }
+
+
+
+def _mascot_data_uri() -> str:
+    path = Path(__file__).with_name("assets") / "mascote.svg"
+    if not path.exists():
+        return ""
+    return "data:image/svg+xml;base64," + base64.b64encode(path.read_bytes()).decode("ascii")
+
+
+MASCOT = _mascot_data_uri()
 
 FETCH_SOURCES = ("auto", "drive", "ena")
 
@@ -240,7 +252,7 @@ def build_args(ws: Workspace, action: str, form: dict[str, str]) -> list[str]:
 CSS = """
 body{font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;margin:0;color:#1d2433;background:#f6f7f9}
 header{background:#1d2433;color:#fff;padding:12px 24px;display:flex;gap:24px;align-items:center}
-header a{color:#cfd8ea;text-decoration:none}header b{font-size:18px}
+header a{color:#cfd8ea;text-decoration:none}header b{font-size:18px}header img{border-radius:50%;margin-right:-12px}
 main{padding:20px 24px;max-width:1200px}
 table{border-collapse:collapse;width:100%;background:#fff}
 th,td{border:1px solid #dde1e8;padding:6px 8px;text-align:left;font-size:14px;vertical-align:top}
@@ -260,10 +272,12 @@ textarea{width:100%;min-height:60px}
 
 def _page(ws: Workspace, title: str, body: str, refresh: bool = False) -> str:
     meta = '<meta http-equiv="refresh" content="3">' if refresh else ""
+    icon = f'<link rel="icon" type="image/svg+xml" href="{MASCOT}">' if MASCOT else ""
+    logo = f'<img src="{MASCOT}" alt="" width="36" height="36">' if MASCOT else ""
     return (
         "<!doctype html><html lang=\"pt-BR\"><head><meta charset=\"utf-8\">"
-        f"{meta}<title>{_esc(title)} | AmpliSentinel {_esc(ws.name)}</title><style>{CSS}</style></head><body>"
-        f"<header><b>AmpliSentinel</b><span>{_esc(ws.name)}</span>"
+        f"{meta}{icon}<title>{_esc(title)} | AmpliSentinel {_esc(ws.name)}</title><style>{CSS}</style></head><body>"
+        f"<header>{logo}<b>AmpliSentinel</b><span>{_esc(ws.name)}</span>"
         '<a href="/">corridas</a><a href="/ledger">ledger</a><a href="/jobs">comandos</a>'
         '<a href="/report">relatório</a>'
         f'<span style="margin-left:auto;font-size:12px">v{_esc(__version__)} 127.0.0.1</span></header>'
