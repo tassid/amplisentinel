@@ -14,7 +14,7 @@ import json
 import os
 import sys
 
-from . import __version__, deblur, decontam, fetch, listen, measure, reconcile
+from . import __version__, deblur, decontam, fetch, listen, measure, publish, reconcile
 from . import inventory as inv
 from . import queries as q
 from . import run as run_worker
@@ -214,6 +214,36 @@ def cmd_decontam(args) -> int:
     return 1
 
 
+def cmd_publish(args) -> int:
+    ws = _ws(args)
+    try:
+        res = publish.publish_run(ws, args.run)
+    except publish.PublishRefused as exc:
+        print(f"recusado: {exc}", file=sys.stderr)
+        return 2
+    print(f"{ws.name}/{res['run']} -> {res['state']}")
+    if res["state"] == "PUBLISHED":
+        print(f"arquivos publicados: {res['files']}  destino: {res['remote_root']}")
+        print(f"{res['manifest']['path']}  sha256={res['manifest']['sha256'][:16]}")
+        return 0
+    if res.get("error_log"):
+        print(f"erro literal: {res['error_log']['path']}  sha256={res['error_log']['sha256'][:16]}")
+    return 1
+
+
+def cmd_clean(args) -> int:
+    ws = _ws(args)
+    try:
+        res = publish.clean_run(ws, args.run)
+    except publish.CleanRefused as exc:
+        print(f"recusado: {exc}", file=sys.stderr)
+        return 2
+    print(f"{ws.name}/{res['run']} -> {res['state']}")
+    print(f"arquivos apagados: {res['deleted_count']}")
+    print(f"{res['manifest']['path']}  sha256={res['manifest']['sha256'][:16]}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="sentinel", description=__doc__)
     p.add_argument("--version", action="version", version=__version__)
@@ -283,6 +313,14 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("decontam", help="identifica contaminantes quando runs.yaml declara negative_controls")
     s.add_argument("run")
     s.set_defaults(func=cmd_decontam)
+
+    s = sub.add_parser("publish", help="envia artefatos para gdrive_rw, DVC e MLflow e confere hashes")
+    s.add_argument("run")
+    s.set_defaults(func=cmd_publish)
+
+    s = sub.add_parser("clean", help="apaga FASTQ e work/ locais apenas em PUBLISHED após conferir hashes remotos")
+    s.add_argument("run")
+    s.set_defaults(func=cmd_clean)
 
     s = sub.add_parser("verify", help="confere a cadeia de hashes do ledger")
     s.set_defaults(func=cmd_verify)
