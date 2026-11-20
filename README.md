@@ -47,8 +47,8 @@ move to the next. Sentinel makes that loop reproducible and auditable:
 | Runs config (`runs.yaml`, unknown keys refused) | working |
 | Drive reconciliation (ENA MD5 × rclone listing, no download) | working |
 | External tool layer (`sentinel/ext/`, logs every call) | working |
-| fetch (rclone, ENA, MD5) | next |
-| run (Nextflow + ampliseq per run) | planned |
+| fetch (Drive via rclone, ENA HTTPS with resume, optional nf-core/fetchngs, MD5) | working |
+| run (Nextflow + ampliseq per run) | next |
 | measure (DADA2 stats, cutadapt, depth, PERMANOVA) | planned |
 | publish / clean (Drive, DVC, MLflow) | planned |
 | Workspaces (one per research project) | working |
@@ -76,6 +76,7 @@ export SENTINEL_WORKSPACE=workspaces/cervical-cancer   # or: sentinel -w <path> 
 sentinel init            # registers runs from config/runs.yaml
 sentinel inventory       # data/accessions/*_runs.txt × ENA → .sentinel/inventory/
 sentinel inventory --drive   # also × Google Drive (rclone lsjson, nothing downloaded)
+sentinel fetch P1        # FASTQ of one run → runs/P1/fastq/, MD5 checked against ENA
 sentinel status
 sentinel verify
 sentinel show run P14    # JSON, the same data the MCP server returns

@@ -6,6 +6,7 @@ from .runner import (
     Runner,
     ToolError,
     call,
+    save_log,
     subprocess_runner,
     tool_version,
 )
@@ -16,6 +17,7 @@ __all__ = [
     "Runner",
     "ToolError",
     "call",
+    "save_log",
     "subprocess_runner",
     "tool_version",
 ]
