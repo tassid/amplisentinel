@@ -13,9 +13,11 @@ import argparse
 import json
 import os
 import sys
+from pathlib import Path
 
 from . import (
     __version__,
+    between,
     deblur,
     decontam,
     fetch,
@@ -271,6 +273,32 @@ def cmd_merge(args) -> int:
     return 0 if res["status"] == "COMPLETED" else 1
 
 
+def cmd_between(args) -> int:
+    ws = _ws(args)
+    try:
+        res = between.run_between(
+            ws,
+            metadata_path=Path(args.metadata),
+            matrix_path=Path(args.matrix) if args.matrix else None,
+            table_path=Path(args.table) if args.table else None,
+            study_col=args.study_col,
+            diagnosis_col=args.diagnosis_col,
+            permutations=args.permutations,
+            seed=args.seed,
+            metric=args.metric,
+        )
+    except between.BetweenRefused as exc:
+        print(f"recusado: {exc}", file=sys.stderr)
+        return 2
+    for label, stats in res["results"].items():
+        print(
+            f"{label}: R2={stats['R2']}  pseudo_F={stats['pseudo_F']}  "
+            f"p={stats['p_value']}  permutations={stats['permutations']}  seed={res['seed']}"
+        )
+    print(f"{res['output']['path']}  sha256={res['output']['sha256'][:16]}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="sentinel", description=__doc__)
     p.add_argument("--version", action="version", version=__version__)
@@ -351,6 +379,17 @@ def main(argv: list[str] | None = None) -> int:
 
     s = sub.add_parser("merge", help="une corridas PUBLISHED/CLEANED, atribui taxonomia SILVA e gera replay-supplement")
     s.set_defaults(func=cmd_merge)
+
+    s = sub.add_parser("between", help="PERMANOVA entre estudos e diagnósticos (scikit-bio)")
+    s.add_argument("--metadata", required=True)
+    s.add_argument("--matrix")
+    s.add_argument("--table")
+    s.add_argument("--study-col", default="study")
+    s.add_argument("--diagnosis-col", default="diagnosis")
+    s.add_argument("--permutations", type=int, default=999)
+    s.add_argument("--seed", type=int, default=42)
+    s.add_argument("--metric", default="braycurtis")
+    s.set_defaults(func=cmd_between)
 
     s = sub.add_parser("verify", help="confere a cadeia de hashes do ledger")
     s.set_defaults(func=cmd_verify)
