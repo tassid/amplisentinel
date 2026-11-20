@@ -57,7 +57,7 @@ move to the next. Sentinel makes that loop reproducible and auditable:
 | MCP server (read only, 13 tools, serve-all, launchd) | working |
 | report (deterministic static HTML report) | working |
 | Workspaces (one per research project) | working |
-| MCP server (read only, locked to one workspace, stdio or HTTP) | working |
+| CI and release packaging (`CITATION.cff`, `CHANGELOG.md`, workflow) | working |
 
 ## Workspaces: one per research project
 
@@ -83,6 +83,10 @@ sentinel inventory       # data/accessions/*_runs.txt × ENA → .sentinel/inven
 sentinel inventory --drive   # also × Google Drive (rclone lsjson, nothing downloaded)
 sentinel fetch P1        # FASTQ of one run → runs/P1/fastq/, MD5 checked against ENA
 sentinel run P1          # nf-core/ampliseq 3.1.0 via Nextflow for one run
+sentinel measure P1      # DADA2/cutadapt/depth/MultiQC metrics vs config/rules.yaml
+sentinel publish P1      # upload artifacts to Drive, DVC, MLflow and verify MD5s
+sentinel clean P1        # remove local FASTQ and work/ only after PUBLISHED check
+sentinel report          # deterministic static HTML report in .sentinel/report.html
 sentinel status
 sentinel verify
 sentinel show run P14    # JSON, the same data the MCP server returns
@@ -118,7 +122,7 @@ studies, 1,042 runs in total. Raw FASTQ files are never committed.
 
 ## Open source stack
 
-See [docs/tools.md](docs/tools.md).
+See [docs/tools.md](docs/tools.md) and [docs/release.md](docs/release.md).
 
 ## License
 
