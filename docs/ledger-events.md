@@ -32,6 +32,7 @@ documented here when their stage lands.
 | `process_completed` | `sentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
 | `process_failed` | `sentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
 | `metrics_recorded` | `sentinel measure` | `run`, `metrics` (path and sha256 of `.sentinel/metrics/<RUN>.json`), `rules_source`, `result` (`MEASURED` or `BLOCKED`), `violations` |
+| `decontam_recorded` | `sentinel decontam` | `run`, `image`, `method`, `threshold`, `negative_controls`, `table_before` and `table_after` (path and sha256), `flagged_asvs` (`asv_id`, `score`), `manifest` (path and sha256) |
 
 ## Notes
 
@@ -77,4 +78,5 @@ documented here when their stage lands.
 | `run.ampliseq_release` | nf-core/ampliseq release passed via `-r` (default `3.1.0`) |
 | `run.weblog_port` | local port for Nextflow `-with-weblog http://127.0.0.1:<port>/events` (default `8765`) |
 | `run.qiime2_image` | digest-pinned QIIME 2 image (`...@sha256:...`) required for `--denoiser deblur` |
+| `run.decontam_image` | digest-pinned R decontam image (`...@sha256:...`) required for `sentinel decontam` |
 | `container_engine` | `docker` (default) or `podman`, passed as `-profile` |

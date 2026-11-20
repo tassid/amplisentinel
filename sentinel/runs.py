@@ -15,7 +15,7 @@ from pathlib import Path
 import yaml
 
 TOP_KEYS = ("runs",)
-RUN_KEYS = ("accessions", "region", "primers", "drive_path", "metadata")
+RUN_KEYS = ("accessions", "region", "primers", "drive_path", "metadata", "negative_controls")
 PRIMER_KEYS = ("forward", "reverse")
 
 
@@ -37,6 +37,7 @@ class RunConfig:
     primers: Primers
     drive_path: str | None = None
     metadata: str | None = None
+    negative_controls: tuple[str, ...] = ()
 
 
 def _text_or_null(value: object, where: str) -> str | None:
@@ -45,6 +46,14 @@ def _text_or_null(value: object, where: str) -> str | None:
     if not isinstance(value, str) or not value.strip():
         raise ConfigError(f"{where}: esperado texto ou null")
     return value
+
+
+def _str_list_or_null(value: object, where: str) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if not isinstance(value, list) or any(not isinstance(x, str) or not x.strip() for x in value):
+        raise ConfigError(f"{where}: esperado lista de textos ou null")
+    return tuple(x.strip() for x in value)
 
 
 def _unknown(keys: Iterable[object], accepted: tuple[str, ...]) -> list[str]:
@@ -95,6 +104,7 @@ def parse_runs(data: object) -> dict[str, RunConfig]:
             ),
             drive_path=_text_or_null(body.get("drive_path"), f"{where}.drive_path"),
             metadata=_text_or_null(body.get("metadata"), f"{where}.metadata"),
+            negative_controls=_str_list_or_null(body.get("negative_controls"), f"{where}.negative_controls"),
         )
     return out
 
