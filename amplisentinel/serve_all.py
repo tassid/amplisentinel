@@ -1,4 +1,4 @@
-"""Multi-workspace MCP server runner (`sentinel serve-all`) and macOS launchd templates."""
+"""Multi-workspace MCP server runner (`amplisentinel serve-all`) and macOS launchd templates."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ import yaml
 from .runs import ConfigError
 from .workspace import Workspace
 
-DEFAULT_WORKSPACES_CONFIG = Path.home() / ".sentinel" / "workspaces.yaml"
+DEFAULT_WORKSPACES_CONFIG = Path.home() / ".amplisentinel" / "workspaces.yaml"
 
 
 @dataclass(frozen=True)
@@ -26,7 +26,7 @@ class ServerEntry:
 
 
 def load_workspaces_config(path: Path | None = None) -> list[ServerEntry]:
-    """Read and validate `~/.sentinel/workspaces.yaml`."""
+    """Read and validate `~/.amplisentinel/workspaces.yaml`."""
     cfg_path = Path(path or DEFAULT_WORKSPACES_CONFIG).expanduser()
     if not cfg_path.exists():
         raise ConfigError(f"arquivo de configuração não encontrado: {cfg_path}")
@@ -67,7 +67,7 @@ def build_commands(entries: list[ServerEntry], *, python_exe: str | None = None)
         [
             exe,
             "-m",
-            "sentinel.cli",
+            "amplisentinel.cli",
             "-w",
             str(entry.workspace.root),
             "mcp",
@@ -112,7 +112,7 @@ def render_launchd_plist(
     ws: Workspace,
     *,
     port: int,
-    sentinel_bin: str = "/opt/homebrew/bin/sentinel",
+    amplisentinel_bin: str = "/opt/homebrew/bin/amplisentinel",
     host: str = "127.0.0.1",
 ) -> str:
     """Render a macOS launchd user agent plist for one workspace MCP server."""
@@ -124,7 +124,7 @@ def render_launchd_plist(
     ws_root = escape(str(ws.root))
     log_out = escape(str(ws.home / "logs" / "mcp.stdout.log"))
     log_err = escape(str(ws.home / "logs" / "mcp.stderr.log"))
-    bin_esc = escape(sentinel_bin)
+    bin_esc = escape(amplisentinel_bin)
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" '

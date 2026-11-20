@@ -1,7 +1,7 @@
 """Validation for researcher-authored rules in config/rules.yaml.
 
 An empty rules.yaml file is valid and yields raw numbers only (`no_rule`).
-Unknown groups or keys are refused with the accepted list. Sentinel never
+Unknown groups or keys are refused with the accepted list. AmpliSentinel never
 invents or adjusts rule thresholds.
 """
 

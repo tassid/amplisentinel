@@ -78,7 +78,7 @@ class RunState:
         current = self.get(run)
         if to not in TRANSITIONS[current]:
             raise TransitionError(f"{run}: transição {current} -> {to} não permitida")
-        actor = "sentinel"
+        actor = "amplisentinel"
         if current == "BLOCKED":
             if not justification or not justification.strip():
                 raise TransitionError(

@@ -1,13 +1,13 @@
-# Using Sentinel from OpenBot
+# Using AmpliSentinel from OpenBot
 
 [OpenBot](https://open.bot) (CopilotKit, MIT) is a local, open source agent workspace.
-Sentinel plugs into it as one MCP server per research project, and one Bot per project.
+AmpliSentinel plugs into it as one MCP server per research project, and one Bot per project.
 
 ```
 OpenBot (desktop)
- ├─ Bot "Sentinel · Cervical cancer" ── http://127.0.0.1:8701/mcp  (workspace cervical-cancer)
- ├─ Bot "Sentinel · Rice"            ── http://127.0.0.1:8702/mcp  (workspace rice)
- └─ Bot "Sentinel · Coral"           ── http://127.0.0.1:8703/mcp  (workspace coral)
+ ├─ Bot "AmpliSentinel · Cervical cancer" ── http://127.0.0.1:8701/mcp  (workspace cervical-cancer)
+ ├─ Bot "AmpliSentinel · Rice"            ── http://127.0.0.1:8702/mcp  (workspace rice)
+ └─ Bot "AmpliSentinel · Coral"           ── http://127.0.0.1:8703/mcp  (workspace coral)
 ```
 
 ## 1. One server per project
@@ -16,9 +16,9 @@ Each server is locked to its workspace when it starts. No tool takes a path, so 
 cervical Bot cannot read the rice project, even if asked.
 
 ```bash
-sentinel -w ~/pesquisa/cervical-cancer mcp --http --port 8701
-sentinel -w ~/pesquisa/rice            mcp --http --port 8702
-sentinel -w ~/pesquisa/coral           mcp --http --port 8703
+amplisentinel -w ~/pesquisa/cervical-cancer mcp --http --port 8701
+amplisentinel -w ~/pesquisa/rice            mcp --http --port 8702
+amplisentinel -w ~/pesquisa/coral           mcp --http --port 8703
 ```
 
 The server listens on 127.0.0.1 only. Use `mcp` without `--http` for clients that start
@@ -52,20 +52,20 @@ granted to Bots. Add one entry per project with its URL, for example
 `http://127.0.0.1:8701/mcp` for cervical cancer.
 
 OpenBot treats tools from custom servers as writes, so it may ask for approval on each
-call. The Sentinel tools are marked `readOnlyHint: true`; if OpenBot still asks, the
+call. The AmpliSentinel tools are marked `readOnlyHint: true`; if OpenBot still asks, the
 approval settings per Bot are at `/bots/:id/approvals`.
 
 ## 3. One Bot per project
 
 Create the Bot at `/bots` and grant it only the tools of its own server.
 
-**Name:** `Sentinel · Cervical cancer`
+**Name:** `AmpliSentinel · Cervical cancer`
 
 **Role description** (paste as is, changing the project name):
 
 ```
-You are the Sentinel interface for ONE research project: cervical-cancer.
-Report only data returned by the Sentinel tools: values, states, error messages,
+You are the AmpliSentinel interface for ONE research project: cervical-cancer.
+Report only data returned by the AmpliSentinel tools: values, states, error messages,
 file paths and hashes. Cite the source path for every number. Repeat error
 messages literally. Compare values only against the rules returned in
 `rules_in_use`; if there is no rule for a value, report the value alone.
@@ -81,7 +81,7 @@ return data only.
 
 1. The OpenBot configuration steps above follow its README at the time of writing.
    Check `docs/configuration.md` in the OpenBot repository if a screen has moved.
-2. To start every server at login on macOS, use `sentinel serve-all` reading
-   `~/.sentinel/workspaces.yaml` or generate a `launchd` agent plist per
-   project with `sentinel -w <workspace> launchd --port 8701` (template in
-   [docs/launchd/com.sentinel.mcp.plist](launchd/com.sentinel.mcp.plist)).
+2. To start every server at login on macOS, use `amplisentinel serve-all` reading
+   `~/.amplisentinel/workspaces.yaml` or generate a `launchd` agent plist per
+   project with `amplisentinel -w <workspace> launchd --port 8701` (template in
+   [docs/launchd/com.amplisentinel.mcp.plist](launchd/com.amplisentinel.mcp.plist)).

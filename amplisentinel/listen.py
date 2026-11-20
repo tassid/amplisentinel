@@ -1,6 +1,6 @@
 """Stage 4: local HTTP listener for Nextflow `-with-weblog` events.
 
-`sentinel listen` binds strictly to `127.0.0.1` using Python's standard
+`amplisentinel listen` binds strictly to `127.0.0.1` using Python's standard
 library and appends `process_started`, `process_completed`, and `process_failed`
 entries to the workspace ledger in arrival order.
 """
@@ -54,7 +54,7 @@ def resolve_run(
 
 
 def map_weblog_event(payload: dict[str, Any]) -> str | None:
-    """Map one Nextflow weblog payload to a Sentinel ledger event name."""
+    """Map one Nextflow weblog payload to a AmpliSentinel ledger event name."""
     nf_event = str(payload.get("event") or "").strip().lower()
     trace = payload.get("trace") if isinstance(payload.get("trace"), dict) else {}
     status = str(trace.get("status") or "").strip().upper()
@@ -121,7 +121,7 @@ def make_server(
 ) -> ThreadingHTTPServer:
     """Create the local-only HTTP server for Nextflow `-with-weblog`."""
     if host != LOOPBACK:
-        raise ValueError(f"sentinel listen aceita apenas {LOOPBACK}, não {host}")
+        raise ValueError(f"amplisentinel listen aceita apenas {LOOPBACK}, não {host}")
     resolved_port = settings(ws).weblog_port if port is None else port
     if isinstance(resolved_port, bool) or not isinstance(resolved_port, int) or not (0 <= resolved_port <= 65535):
         raise ValueError(f"porta inválida: {resolved_port}")
@@ -170,7 +170,7 @@ def make_server(
 
 
 def serve(ws: Workspace, *, port: int | None = None, default_run: str | None = None) -> int:
-    """Start `sentinel listen` until interrupted."""
+    """Start `amplisentinel listen` until interrupted."""
     server = make_server(ws, port=port if port is not None else settings(ws).weblog_port or DEFAULT_WEBLOG_PORT,
                          default_run=default_run)
     host, actual_port = server.server_address[:2]

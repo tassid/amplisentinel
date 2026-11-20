@@ -1,9 +1,9 @@
 # Ledger events
 
-Every line of `.sentinel/ledger.jsonl` is one event. Each event has `ts`, `event`,
-`actor` (`sentinel` or `human`), `user`, `host`, `git_commit`, `data`, `prev` and
-`hash`. `actor: human` is only written by `sentinel decide` and by
-`sentinel move ... -j`.
+Every line of `.amplisentinel/ledger.jsonl` is one event. Each event has `ts`, `event`,
+`actor` (`amplisentinel` or `human`), `user`, `host`, `git_commit`, `data`, `prev` and
+`hash`. `actor: human` is only written by `amplisentinel decide` and by
+`amplisentinel move ... -j`.
 
 This file lists the events that the code writes today. Events of later stages are
 documented here when their stage lands.
@@ -12,42 +12,42 @@ documented here when their stage lands.
 
 | Event | Written by | `data` fields |
 |---|---|---|
-| `workspace_created` | `sentinel new` | `name`, `version` |
-| `init` | `sentinel init` | `version`, `workspace` |
-| `runs_registered` | `sentinel init` (new runs only) | `runs` (list) |
-| `state_change` | `sentinel move` | `run`, `from`, `to`, `justification` |
-| `decision` | `sentinel decide` (`actor: human`) | `run`, `text` |
-| `inventory_built` | `sentinel inventory` | `projects`, `accessions`, `not_found`, `files` (path to sha256) |
-| `reconciliation_built` | `sentinel inventory --drive` | `runs`, `accessions`, `files`, `present_in_drive`, `equal`, `runs_without_drive_path`, `drive_listings` (per run: `drive_path`, `stdout` path and sha256, `version`), `output` (path and sha256 of `reconciliation.tsv`), `ena_cache` (path and sha256) |
-| `tool_call` | any external tool, through `sentinel/ext/` | `command` (exact argv), `tool`, `version` (first line of `<tool> version`), `exit_code`, `stdout` and `stderr` (path and sha256) |
+| `workspace_created` | `amplisentinel new` | `name`, `version` |
+| `init` | `amplisentinel init` | `version`, `workspace` |
+| `runs_registered` | `amplisentinel init` (new runs only) | `runs` (list) |
+| `state_change` | `amplisentinel move` | `run`, `from`, `to`, `justification` |
+| `decision` | `amplisentinel decide` (`actor: human`) | `run`, `text` |
+| `inventory_built` | `amplisentinel inventory` | `projects`, `accessions`, `not_found`, `files` (path to sha256) |
+| `reconciliation_built` | `amplisentinel inventory --drive` | `runs`, `accessions`, `files`, `present_in_drive`, `equal`, `runs_without_drive_path`, `drive_listings` (per run: `drive_path`, `stdout` path and sha256, `version`), `output` (path and sha256 of `reconciliation.tsv`), `ena_cache` (path and sha256) |
+| `tool_call` | any external tool, through `amplisentinel/ext/` | `command` (exact argv), `tool`, `version` (first line of `<tool> version`), `exit_code`, `stdout` and `stderr` (path and sha256) |
 | `error` | an external tool that exits non-zero | `tool`, `command`, `exit_code`, `stderr` (path and sha256), plus `run` when the call belongs to a run. The text is in that file, byte for byte |
-| `error` | `sentinel fetch` | `run`, `stage: fetch`, and either `files` (list of `accession`, `file`, `reason`, optional `log` path and sha256), `reason: espaço em disco` with the disk fields of `fetch_started`, or `reason: metadados do ENA` with `log` |
-| `fetch_started` | `sentinel fetch` | `run`, `via` (`direct` or `fetchngs`), `source` (`auto`, `drive`, `ena`), `files`, `fastq_dir`, `resumed`, `bytes_total`, `bytes_remaining`, `disk_slack`, `disk_required`, `disk_free` |
-| `file_verified` | `sentinel fetch` | `run`, `file`, `source` (`drive`, `ena`, `fetchngs`, `local`), `bytes`, `md5_expected` (ENA), `md5_obtained`, `equal` |
-| `fetch_completed` | `sentinel fetch` | `run`, `manifest` (path and sha256 of `fetch_manifest.json`), `files`, `equal`, `result` (`MD5_OK` or `BLOCKED`) |
-| `environment` | `sentinel run` | `run`, `ampliseq_release`, `nextflow_version`, `container_engine`, `container_engine_version`, `docker_version`, `colima_version`, `vm_config` (`name`, `status`, `vmType`, `rosetta`), `images` (list of `image`, `digest`), `conda_env` (`available`, `path`, `sha256` or `exit_code`/`stderr`), `samplesheet` and `params` (path and sha256) |
-| `run_completed` | `sentinel run` | `run`, `result` (`PROCESSING` or `BLOCKED`), `manifest` (path and sha256 of `run_manifest.json`), `outdir`, `images`, `artifacts` (trace/report/timeline/nextflow_log paths and sha256), or `error_log` when `BLOCKED` |
-| `experiment_recorded` | `sentinel run --denoiser deblur` | `run`, `experiment_id`, `denoiser` (`deblur`), `status` (`COMPLETED` or `FAILED`), `qiime2_image`, `parameters`, `artifacts` (paths and sha256), `experiment` (path and sha256 of `experiment.json`), `mlflow`, or `error_log` |
-| `process_started` | `sentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
-| `process_completed` | `sentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
-| `process_failed` | `sentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
-| `metrics_recorded` | `sentinel measure` | `run`, `metrics` (path and sha256 of `.sentinel/metrics/<RUN>.json`), `rules_source`, `result` (`MEASURED` or `BLOCKED`), `violations` |
-| `decontam_recorded` | `sentinel decontam` | `run`, `image`, `method`, `threshold`, `negative_controls`, `table_before` and `table_after` (path and sha256), `flagged_asvs` (`asv_id`, `score`), `manifest` (path and sha256) |
-| `published` | `sentinel publish` | `run`, `remote_root`, `files`, `manifest` (path and sha256 of `publish_manifest.json`), `dvc`, `mlflow` |
-| `cleaned` | `sentinel clean` | `run`, `deleted_count`, `deleted_files` (`path`, `bytes`, `md5`, `sha256`), `manifest` (path and sha256 of `clean_manifest.json`) |
-| `merge` | `sentinel merge` | `run` (`merge`), `runs`, `regions_by_run`, `strategy`, `qiime2_image`, `silva_classifier` (`path`, `md5`, `sha256`), `artifacts` (including `replay_supplement`), `manifest` (path and sha256) |
-| `between_metrics` | `sentinel between` | `run` (`between`), `seed`, `permutations`, `metric`, `sources` (`input`, `metadata`), `results` (`study`, `diagnosis` with `R2`, `pseudo_F`, `p_value`), `output` (path and sha256 of `.sentinel/metrics/between.json`) |
-| `export` | `sentinel export` | `run` (`ml`), `source_qza_uuid`, `source_qza`, `tsv`, `parquet`, `rows`, `columns`, `manifest` |
-| `folds` | `sentinel folds` | `run` (`ml`), `scheme` (`leave-one-project-out`), `n_folds`, `source_qza_uuid`, `folds_file` (path and sha256), `folds` (counts by class) |
-| `ml_trained` | `sentinel train` | `run` (`ml`), `seed`, `source_qza_uuid`, `folds_sha256`, `versions`, `metrics`, `artifacts` (`shap_values`, `tsne_coords`), `mlflow`, `manifest` |
-| `ui_command` | `sentinel ui` (button) | `job`, `argv` (literal command), `log` (path), `run` (or null); actor `human` |
-| `ui_command_finished` | `sentinel ui` | `job`, `argv`, `exit_code`, `log` (path and sha256), `run` |
+| `error` | `amplisentinel fetch` | `run`, `stage: fetch`, and either `files` (list of `accession`, `file`, `reason`, optional `log` path and sha256), `reason: espaço em disco` with the disk fields of `fetch_started`, or `reason: metadados do ENA` with `log` |
+| `fetch_started` | `amplisentinel fetch` | `run`, `via` (`direct` or `fetchngs`), `source` (`auto`, `drive`, `ena`), `files`, `fastq_dir`, `resumed`, `bytes_total`, `bytes_remaining`, `disk_slack`, `disk_required`, `disk_free` |
+| `file_verified` | `amplisentinel fetch` | `run`, `file`, `source` (`drive`, `ena`, `fetchngs`, `local`), `bytes`, `md5_expected` (ENA), `md5_obtained`, `equal` |
+| `fetch_completed` | `amplisentinel fetch` | `run`, `manifest` (path and sha256 of `fetch_manifest.json`), `files`, `equal`, `result` (`MD5_OK` or `BLOCKED`) |
+| `environment` | `amplisentinel run` | `run`, `ampliseq_release`, `nextflow_version`, `container_engine`, `container_engine_version`, `docker_version`, `colima_version`, `vm_config` (`name`, `status`, `vmType`, `rosetta`), `images` (list of `image`, `digest`), `conda_env` (`available`, `path`, `sha256` or `exit_code`/`stderr`), `samplesheet` and `params` (path and sha256) |
+| `run_completed` | `amplisentinel run` | `run`, `result` (`PROCESSING` or `BLOCKED`), `manifest` (path and sha256 of `run_manifest.json`), `outdir`, `images`, `artifacts` (trace/report/timeline/nextflow_log paths and sha256), or `error_log` when `BLOCKED` |
+| `experiment_recorded` | `amplisentinel run --denoiser deblur` | `run`, `experiment_id`, `denoiser` (`deblur`), `status` (`COMPLETED` or `FAILED`), `qiime2_image`, `parameters`, `artifacts` (paths and sha256), `experiment` (path and sha256 of `experiment.json`), `mlflow`, or `error_log` |
+| `process_started` | `amplisentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
+| `process_completed` | `amplisentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
+| `process_failed` | `amplisentinel listen` | `run`, `process`, `task_id`, `hash`, `tag`, `status`, `exit_code`, `run_name`, `utc_time` |
+| `metrics_recorded` | `amplisentinel measure` | `run`, `metrics` (path and sha256 of `.amplisentinel/metrics/<RUN>.json`), `rules_source`, `result` (`MEASURED` or `BLOCKED`), `violations` |
+| `decontam_recorded` | `amplisentinel decontam` | `run`, `image`, `method`, `threshold`, `negative_controls`, `table_before` and `table_after` (path and sha256), `flagged_asvs` (`asv_id`, `score`), `manifest` (path and sha256) |
+| `published` | `amplisentinel publish` | `run`, `remote_root`, `files`, `manifest` (path and sha256 of `publish_manifest.json`), `dvc`, `mlflow` |
+| `cleaned` | `amplisentinel clean` | `run`, `deleted_count`, `deleted_files` (`path`, `bytes`, `md5`, `sha256`), `manifest` (path and sha256 of `clean_manifest.json`) |
+| `merge` | `amplisentinel merge` | `run` (`merge`), `runs`, `regions_by_run`, `strategy`, `qiime2_image`, `silva_classifier` (`path`, `md5`, `sha256`), `artifacts` (including `replay_supplement`), `manifest` (path and sha256) |
+| `between_metrics` | `amplisentinel between` | `run` (`between`), `seed`, `permutations`, `metric`, `sources` (`input`, `metadata`), `results` (`study`, `diagnosis` with `R2`, `pseudo_F`, `p_value`), `output` (path and sha256 of `.amplisentinel/metrics/between.json`) |
+| `export` | `amplisentinel export` | `run` (`ml`), `source_qza_uuid`, `source_qza`, `tsv`, `parquet`, `rows`, `columns`, `manifest` |
+| `folds` | `amplisentinel folds` | `run` (`ml`), `scheme` (`leave-one-project-out`), `n_folds`, `source_qza_uuid`, `folds_file` (path and sha256), `folds` (counts by class) |
+| `ml_trained` | `amplisentinel train` | `run` (`ml`), `seed`, `source_qza_uuid`, `folds_sha256`, `versions`, `metrics`, `artifacts` (`shap_values`, `tsne_coords`), `mlflow`, `manifest` |
+| `ui_command` | `amplisentinel ui` (button) | `job`, `argv` (literal command), `log` (path), `run` (or null); actor `human` |
+| `ui_command_finished` | `amplisentinel ui` | `job`, `argv`, `exit_code`, `log` (path and sha256), `run` |
 
 ## Notes
 
-- Appends take an exclusive lock on `.sentinel/ledger.jsonl.lock` (fcntl on macOS and Linux, msvcrt on Windows), so `run`, `listen` and `ui` can write at the same time without breaking the hash chain.
+- Appends take an exclusive lock on `.amplisentinel/ledger.jsonl.lock` (fcntl on macOS and Linux, msvcrt on Windows), so `run`, `listen` and `ui` can write at the same time without breaking the hash chain.
 
-- Log files of external tools are in `.sentinel/logs/` as
+- Log files of external tools are in `.amplisentinel/logs/` as
   `<UTC timestamp>-<tool>.stdout` and `.stderr`. The ledger stores their sha256.
 - `reconciliation.tsv` columns: `run`, `accession`, `ena_found`, `expected_file`,
   `ena_md5`, `ena_bytes`, `present_in_drive`, `drive_md5`, `equal`. Values are
@@ -73,14 +73,14 @@ documented here when their stage lands.
     accessions are single-end), `run` (schema of nf-core/ampliseq 3.1.0).
   - `params.yaml`: `input`, `outdir`, `primer_fwd`, `primer_rev`, optional
     `metadata`, and `sequencing_type: illumina_se` for single-end runs. No
-    truncation, trimming, or threshold parameters are added by Sentinel.
+    truncation, trimming, or threshold parameters are added by AmpliSentinel.
 - Results go to `<workspace>/runs/<RUN>/results/` and Nextflow work files go to
   `<workspace>/runs/<RUN>/work/`. Trace, report, and timeline files go to
   `<workspace>/runs/<RUN>/ampliseq/pipeline_info/`.
 - `run_manifest.json` (in `runs/<RUN>/`) records the command, generated inputs,
   image digests, produced artifacts, or `error_log` when `BLOCKED`.
 
-## sentinel.yaml keys read by fetch and run
+## amplisentinel.yaml keys read by fetch and run
 
 | Key | Meaning |
 |---|---|
@@ -89,5 +89,5 @@ documented here when their stage lands.
 | `run.ampliseq_release` | nf-core/ampliseq release passed via `-r` (default `3.1.0`) |
 | `run.weblog_port` | local port for Nextflow `-with-weblog http://127.0.0.1:<port>/events` (default `8765`) |
 | `run.qiime2_image` | digest-pinned QIIME 2 image (`...@sha256:...`) required for `--denoiser deblur` |
-| `run.decontam_image` | digest-pinned R decontam image (`...@sha256:...`) required for `sentinel decontam` |
+| `run.decontam_image` | digest-pinned R decontam image (`...@sha256:...`) required for `amplisentinel decontam` |
 | `container_engine` | `docker` (default) or `podman`, passed as `-profile` |

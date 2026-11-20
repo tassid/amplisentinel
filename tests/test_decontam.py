@@ -3,11 +3,11 @@
 import hashlib
 from pathlib import Path
 
-from sentinel import decontam
-from sentinel.cli import main
-from sentinel.ext import CallResult
-from sentinel.runs import parse_runs
-from sentinel.workspace import Workspace
+from amplisentinel import decontam
+from amplisentinel.cli import main
+from amplisentinel.ext import CallResult
+from amplisentinel.runs import parse_runs
+from amplisentinel.workspace import Workspace
 
 DECONTAM_IMAGE = "community.wave.seqera.io/library/bioconductor-decontam_r-base@sha256:" + "d" * 64
 
@@ -33,7 +33,7 @@ class FakeDecontamTools:
 
 def _setup(tmp_path: Path, *, with_controls: bool = True, with_rules: bool = True) -> Workspace:
     ws = Workspace.create(tmp_path / "ws", name="t")
-    (ws.root / "sentinel.yaml").write_text(
+    (ws.root / "amplisentinel.yaml").write_text(
         f"name: t\ntitle: t\nrun:\n  decontam_image: '{DECONTAM_IMAGE}'\n",
         encoding="utf-8",
     )

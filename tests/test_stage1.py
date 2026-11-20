@@ -5,10 +5,10 @@ import json
 
 import pytest
 
-from sentinel import reconcile
-from sentinel.ext import CallResult, ToolError
-from sentinel.runs import ConfigError, parse_runs
-from sentinel.workspace import Workspace
+from amplisentinel import reconcile
+from amplisentinel.ext import CallResult, ToolError
+from amplisentinel.runs import ConfigError, parse_runs
+from amplisentinel.workspace import Workspace
 
 ENA_DB = {
     "SRR1": {
@@ -241,7 +241,7 @@ def test_rclone_failure_keeps_literal_stderr_and_ledger_error(tmp_path):
 def test_missing_accession_file_is_reported(tmp_path):
     ws = Workspace.create(tmp_path / "ws", name="t")
     ws.runs_file.write_text(RUNS_WITHOUT_DRIVE, encoding="utf-8")
-    from sentinel.workspace import WorkspaceError
+    from amplisentinel.workspace import WorkspaceError
 
     with pytest.raises(WorkspaceError, match="arquivo de accessions não encontrado"):
         reconcile.build(ws, fetcher=fake_ena, runner=FakeRclone())
@@ -250,7 +250,7 @@ def test_missing_accession_file_is_reported(tmp_path):
 # --- projects.tsv counts -----------------------------------------------------
 
 def test_projects_tsv_counts_studies_and_layouts(tmp_path):
-    from sentinel import inventory as inv
+    from amplisentinel import inventory as inv
 
     acc = tmp_path / "acc"
     acc.mkdir()

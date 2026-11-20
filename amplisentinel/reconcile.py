@@ -3,7 +3,7 @@
 For every accession of every run, the ENA record gives the expected FASTQ file
 names and their MD5. The Drive listing (`rclone lsjson --hash --recursive`,
 which downloads nothing) gives which files are present and their MD5.
-One row per expected FASTQ file goes to .sentinel/inventory/reconciliation.tsv.
+One row per expected FASTQ file goes to .amplisentinel/inventory/reconciliation.tsv.
 
 Values are copied, never interpreted. A run without `drive_path` in runs.yaml
 is not looked up on Drive, so its rows say `not_checked`. Two files with the

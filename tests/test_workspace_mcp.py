@@ -3,9 +3,9 @@ import json
 
 import pytest
 
-from sentinel import queries as q
-from sentinel.cli import main
-from sentinel.workspace import Workspace, WorkspaceError
+from amplisentinel import queries as q
+from amplisentinel.cli import main
+from amplisentinel.workspace import Workspace, WorkspaceError
 
 
 def _make(tmp_path, name, runs):
@@ -55,7 +55,7 @@ def test_cli_with_workspace_flag(tmp_path, capsys):
 
 def test_mcp_tools_are_read_only_and_scoped(tmp_path):
     pytest.importorskip("mcp")
-    from sentinel.mcp_server import build_server
+    from amplisentinel.mcp_server import build_server
 
     ws = _make(tmp_path, "cervical", ["P1"])
     server = build_server(ws)

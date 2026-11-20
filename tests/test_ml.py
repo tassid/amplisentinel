@@ -6,9 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from sentinel import ml
-from sentinel.cli import main
-from sentinel.workspace import Workspace
+from amplisentinel import ml
+from amplisentinel.cli import main
+from amplisentinel.workspace import Workspace
 
 
 def _make_qza(path: Path, uuid: str) -> None:

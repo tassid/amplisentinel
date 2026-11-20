@@ -1,9 +1,9 @@
 """Stage 5: measure worker reading nf-core/ampliseq 3.1.0 outputs with pandas.
 
-`sentinel measure <RUN>` extracts neutral numeric metrics from DADA2, cutadapt,
+`amplisentinel measure <RUN>` extracts neutral numeric metrics from DADA2, cutadapt,
 ASV lengths, taxonomy, per-sample depth, and MultiQC `multiqc_data/`, compares
 each value strictly against thresholds written by the researcher in
-`config/rules.yaml`, writes `.sentinel/metrics/<RUN>.json`, and transitions the
+`config/rules.yaml`, writes `.amplisentinel/metrics/<RUN>.json`, and transitions the
 run to `MEASURED` (or `BLOCKED` if any rule evaluates to `below` or `above`).
 Empty `rules.yaml` produces `no_rule` only and never blocks.
 """
@@ -181,7 +181,7 @@ def measure_run(ws: Workspace, run: str) -> dict[str, Any]:
     current = ws.state.get(run)
     if current == "BLOCKED":
         raise MeasureRefused(
-            f"{run} está em BLOCKED; sair de BLOCKED exige `sentinel move {run} PROCESSING -j`"
+            f"{run} está em BLOCKED; sair de BLOCKED exige `amplisentinel move {run} PROCESSING -j`"
         )
     if current != "PROCESSING":
         raise MeasureRefused(f"{run} está em {current}; measure só roda em PROCESSING")

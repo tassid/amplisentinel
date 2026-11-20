@@ -1,7 +1,7 @@
 """Thin layer over external tools (rclone now; Nextflow, Docker and others later).
 
 Every external call goes through `call()`. It runs the command through a
-Runner, saves stdout and stderr byte for byte under .sentinel/logs/, and writes
+Runner, saves stdout and stderr byte for byte under .amplisentinel/logs/, and writes
 one `tool_call` event to the ledger with the exact command, the tool version,
 the exit code and the sha256 of both outputs. A non-zero exit also writes an
 `error` event that points to the saved stderr, and raises ToolError with the
@@ -73,7 +73,7 @@ def _unique_log_pair(log_dir: Path, stamp: str, tool_name: str) -> tuple[Path, P
 
 
 def save_log(ws: Workspace, label: str, data: bytes) -> dict:
-    """Save bytes under .sentinel/logs/ and return {"path", "sha256"}."""
+    """Save bytes under .amplisentinel/logs/ and return {"path", "sha256"}."""
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     log_dir = ws.home / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)

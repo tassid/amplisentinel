@@ -3,9 +3,9 @@
 import json
 import re
 
-from sentinel import report
-from sentinel.cli import main
-from sentinel.workspace import Workspace
+from amplisentinel import report
+from amplisentinel.cli import main
+from amplisentinel.workspace import Workspace
 
 
 def _strip_timestamp(html_text: str) -> str:

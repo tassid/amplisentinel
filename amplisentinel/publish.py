@@ -1,12 +1,12 @@
 """Stage 6: publish verified run outputs and safely clean local raw files.
 
-`sentinel publish <RUN>`:
+`amplisentinel publish <RUN>`:
   Uploads `.qza`, `.qzv`, metrics, logs, and the run's ledger slice to
   `gdrive_rw:<workspace>/<RUN>/`, registers the bundle in DVC, logs the run in
   MLflow (including Git commit and ledger head hash), checks remote MD5s after
   upload, and transitions `MEASURED -> PUBLISHED`.
 
-`sentinel clean <RUN>`:
+`amplisentinel clean <RUN>`:
   Runs strictly in `PUBLISHED`, re-checks remote MD5s against the published
   manifest before touching disk, deletes `runs/<RUN>/fastq/` and
   `runs/<RUN>/work/`, records every deleted file with its hash in the ledger,
@@ -119,7 +119,7 @@ def publish_run(
     current = ws.state.get(run)
     if current == "BLOCKED":
         raise PublishRefused(
-            f"{run} está em BLOCKED; sair de BLOCKED exige `sentinel move {run} MEASURED -j`"
+            f"{run} está em BLOCKED; sair de BLOCKED exige `amplisentinel move {run} MEASURED -j`"
         )
     if current != "MEASURED":
         raise PublishRefused(f"{run} está em {current}; publish só roda em MEASURED")

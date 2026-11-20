@@ -1,6 +1,6 @@
 """Optional Stage 3b: Deblur denoiser via QIIME 2 in a pinned container.
 
-`sentinel run <RUN> --denoiser deblur` runs cutadapt + Deblur inside a pinned
+`amplisentinel run <RUN> --denoiser deblur` runs cutadapt + Deblur inside a pinned
 QIIME 2 container over the verified FASTQ files of `<RUN>` as a separate
 experiment with its own ID, directory, parameters, and artifact hashes. It
 never touches or overwrites DADA2 outputs (`runs/<RUN>/results/` or
@@ -40,10 +40,10 @@ def _qiime2_image(ws: Workspace) -> str:
     block = meta.get("run") or {}
     image = block.get("qiime2_image")
     if not isinstance(image, str) or not image.strip():
-        raise RunRefused("sentinel.yaml: falta run.qiime2_image travada por digest (@sha256:...)")
+        raise RunRefused("amplisentinel.yaml: falta run.qiime2_image travada por digest (@sha256:...)")
     if "@sha256:" not in image:
         raise RunRefused(
-            f"sentinel.yaml run.qiime2_image precisa estar travada por digest (@sha256:...): {image}"
+            f"amplisentinel.yaml run.qiime2_image precisa estar travada por digest (@sha256:...): {image}"
         )
     return image.strip()
 
@@ -65,7 +65,7 @@ def run_deblur(
 
     current = ws.state.get(run)
     if current == "BLOCKED":
-        raise RunRefused(f"{run} está em BLOCKED; sair de BLOCKED exige `sentinel move {run} PROCESSING -j`")
+        raise RunRefused(f"{run} está em BLOCKED; sair de BLOCKED exige `amplisentinel move {run} PROCESSING -j`")
     if current not in ("MD5_OK", "PROCESSING", "MEASURED", "PUBLISHED"):
         raise RunRefused(
             f"{run} está em {current}; --denoiser deblur exige MD5_OK, PROCESSING, MEASURED ou PUBLISHED"

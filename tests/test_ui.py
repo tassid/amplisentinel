@@ -1,4 +1,4 @@
-"""Browser interface (`sentinel ui`) and cross-process ledger lock."""
+"""Browser interface (`amplisentinel ui`) and cross-process ledger lock."""
 
 import http.client
 import subprocess
@@ -8,9 +8,9 @@ from urllib.parse import urlencode
 
 import pytest
 
-from sentinel import ui
-from sentinel.ledger import Ledger
-from sentinel.workspace import Workspace
+from amplisentinel import ui
+from amplisentinel.ledger import Ledger
+from amplisentinel.workspace import Workspace
 
 
 def _ws(tmp_path):
@@ -23,7 +23,7 @@ def _ws(tmp_path):
 def test_ledger_chain_survives_parallel_processes(tmp_path):
     path = tmp_path / "ledger.jsonl"
     code = (
-        "import sys; from sentinel.ledger import Ledger\n"
+        "import sys; from amplisentinel.ledger import Ledger\n"
         "l = Ledger(sys.argv[1])\n"
         "for i in range(25): l.append('t', {'i': i, 'p': sys.argv[2]})\n"
     )

@@ -6,7 +6,7 @@
   <string>org.amplisentinel.mcp.PROJECT_NAME</string>
   <key>ProgramArguments</key>
   <array>
-    <string>/path/to/conda/envs/sentinel/bin/sentinel</string>
+    <string>/path/to/conda/envs/amplisentinel/bin/amplisentinel</string>
     <string>-w</string>
     <string>/Users/USER/pesquisa/PROJECT_NAME</string>
     <string>mcp</string>
@@ -21,8 +21,8 @@
   <key>KeepAlive</key>
   <true/>
   <key>StandardOutPath</key>
-  <string>/Users/USER/pesquisa/PROJECT_NAME/.sentinel/logs/mcp.stdout.log</string>
+  <string>/Users/USER/pesquisa/PROJECT_NAME/.amplisentinel/logs/mcp.stdout.log</string>
   <key>StandardErrorPath</key>
-  <string>/Users/USER/pesquisa/PROJECT_NAME/.sentinel/logs/mcp.stderr.log</string>
+  <string>/Users/USER/pesquisa/PROJECT_NAME/.amplisentinel/logs/mcp.stderr.log</string>
 </dict>
 </plist>

@@ -6,10 +6,10 @@ import re
 
 import pytest
 
-from sentinel import measure
-from sentinel.cli import main
-from sentinel.runs import ConfigError
-from sentinel.workspace import Workspace
+from amplisentinel import measure
+from amplisentinel.cli import main
+from amplisentinel.runs import ConfigError
+from amplisentinel.workspace import Workspace
 
 
 def _write_ampliseq_fixture(ws: Workspace, run_name: str, *, merged_pct_low: bool = False) -> None:

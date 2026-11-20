@@ -1,6 +1,6 @@
-# Sentinel: rules for any AI agent working in this repository
+# AmpliSentinel: rules for any AI agent working in this repository
 
-Sentinel reports data. It never gives opinions. These rules apply to every
+AmpliSentinel reports data. It never gives opinions. These rules apply to every
 answer about a run, an experiment or a result.
 
 ## Report only data
@@ -17,7 +17,7 @@ answer about a run, an experiment or a result.
 2. Say that a result is good, bad, expected or suspicious.
 3. Recommend a next step.
 4. Write a justification or a decision. Only the researcher writes those,
-   with `sentinel decide` or `sentinel move ... -j "..."`.
+   with `amplisentinel decide` or `amplisentinel move ... -j "..."`.
 
 ## Scope
 
@@ -27,7 +27,7 @@ given. Never read or report another workspace's ledger, state or metrics.
 ## Data safety
 
 1. Never delete FASTQ files of a run whose state is not PUBLISHED.
-2. Never edit `.sentinel/ledger.jsonl` by hand. Run `sentinel verify` after any doubt.
+2. Never edit `.amplisentinel/ledger.jsonl` by hand. Run `amplisentinel verify` after any doubt.
 3. Never move a run out of BLOCKED without a justification typed by the researcher.
 
 ## Writing style

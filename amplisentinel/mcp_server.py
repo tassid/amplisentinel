@@ -2,8 +2,8 @@
 
 Start one server per project, for example from OpenBot:
 
-    sentinel --workspace ~/pesquisa/cervical-cancer mcp            # stdio
-    sentinel --workspace ~/pesquisa/cervical-cancer mcp --http --port 8701
+    amplisentinel --workspace ~/pesquisa/cervical-cancer mcp            # stdio
+    amplisentinel --workspace ~/pesquisa/cervical-cancer mcp --http --port 8701
 
 The workspace is fixed when the server starts. No tool takes a path, so a Bot
 attached to this server cannot read any other project. Every tool is read only
@@ -18,7 +18,7 @@ from typing import Any
 from . import queries as q
 from .workspace import Workspace
 
-INSTRUCTIONS = """You are the Sentinel interface for ONE research project: {name}.
+INSTRUCTIONS = """You are the AmpliSentinel interface for ONE research project: {name}.
 Report only data returned by these tools: values, states, error messages, file
 paths and hashes. Cite the source path for every number. Repeat error messages
 literally. Compare values only against the rules returned in `rules_in_use`; if
@@ -42,8 +42,8 @@ def build_server(ws: Workspace):
             raise ToolError(str(exc)) from None
 
     server = MCPServer(
-        name=f"sentinel-{ws.name}",
-        title=f"Sentinel: {ws.meta.get('title') or ws.name}",
+        name=f"amplisentinel-{ws.name}",
+        title=f"AmpliSentinel: {ws.meta.get('title') or ws.name}",
         instructions=INSTRUCTIONS.format(name=ws.name),
     )
 

@@ -1,12 +1,12 @@
 cff-version: 1.2.0
-message: "If you use Sentinel (amplisentinel) in your research, please cite it using this metadata."
-title: "Sentinel: auditable experiment manager for multi-run amplicon processing"
+message: "If you use AmpliSentinel (amplisentinel) in your research, please cite it using this metadata."
+title: "AmpliSentinel: auditable experiment manager for multi-run amplicon processing"
 type: software
 authors:
   - family-names: Anzolin
     given-names: Tassiane
-repository-code: "https://github.com/tassid/sentinel"
-url: "https://github.com/tassid/sentinel"
+repository-code: "https://github.com/tassid/amplisentinel"
+url: "https://github.com/tassid/amplisentinel"
 license: BSD-3-Clause
 version: "0.2.0"
 date-released: "2026-11-19"

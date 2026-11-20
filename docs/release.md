@@ -3,13 +3,13 @@
 ## 1. GitHub Actions CI
 
 The workflow in [.github/workflows/ci.yml](../.github/workflows/ci.yml) runs
-`ruff check sentinel tests` and `pytest` on `ubuntu-latest` and `macos-latest`
+`ruff check amplisentinel tests` and `pytest` on `ubuntu-latest` and `macos-latest`
 across Python 3.10, 3.12, and 3.13 without network access.
 
 ## 2. Zenodo DOI via GitHub Release
 
 1. Sign in to Zenodo (`https://zenodo.org`) with your GitHub account.
-2. Under GitHub settings in Zenodo, enable the repository `tassid/sentinel`.
+2. Under GitHub settings in Zenodo, enable the repository `tassid/amplisentinel`.
 3. Create and publish a tagged GitHub release matching the semantic version in
    `pyproject.toml` and `CITATION.cff` (for example `v0.2.0`).
 4. Zenodo reads `.zenodo.json` and `CITATION.cff`, mints a persistent DOI, and
