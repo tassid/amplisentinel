@@ -7,6 +7,8 @@ AmpliSentinel watches every step, records everything, and reports data. It never
 
 Python package: `amplisentinel` · Command: `amplisentinel` · License: BSD-3-Clause
 
+**Install:** [macOS](#macos-apple-silicon-or-intel) · [Linux](#linux) · [Windows](#windows) · [Commands](#commands) · [Dashboard](#browser-dashboard)
+
 ## Why
 
 Processing ~100 GB of public 16S data from many studies on one laptop means running in parts:
@@ -69,17 +71,154 @@ workspace with its own config, accession lists, ledger and state. Nothing is sha
 
 ```
 workspaces/cervical-cancer/
-  amplisentinel.yaml            name, title
+  amplisentinel.yaml       name, title, tool versions and image digests
   config/runs.yaml         sequencing runs
   config/rules.yaml        thresholds written by the researcher
   data/accessions/         <STUDY>_runs.txt
-  .amplisentinel/               ledger, state, inventory, metrics (not committed)
+  .amplisentinel/          ledger, state, inventory, metrics (not committed)
 ```
 
-## Quick start
+## Installation
+
+AmpliSentinel runs on the computer that processes the data. The Python package is
+tested by CI on macOS and Linux (Python 3.10, 3.12, 3.13). Nextflow, nf-core/ampliseq
+and the containers have not yet been validated end to end on a real run.
+
+### macOS (Apple Silicon or Intel)
+
+macOS 13 or later. Every step ends with a check; continue only when it prints what
+is described.
+
+**1. Homebrew** (package manager). Skip if `brew --version` already works.
 
 ```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+On Apple Silicon, run the two `echo ... >> ~/.zprofile` and `eval ...` lines that the
+installer prints at the end, then check: `brew --version`.
+
+**2. Tools**
+
+```bash
+brew install git rclone nextflow colima docker
+brew install --cask miniforge
+conda init "$(basename "$SHELL")"
+```
+
+Close and reopen the Terminal, then check:
+
+```bash
+nextflow -version && rclone version && conda --version
+```
+
+| Tool | Used for |
+|---|---|
+| Nextflow (installs Java with it) | runs nf-core/ampliseq |
+| Colima + Docker CLI | runs the pipeline containers in a small Linux VM |
+| rclone | reads and writes Google Drive, gets MD5 without downloading |
+| Miniforge (conda) | Python environment with pinned versions |
+
+**3. Start Colima** (the container engine). CPU, memory and disk below are examples;
+use what your Mac has to spare.
+
+```bash
+# Apple Silicon: Rosetta lets the VM run amd64 images (QIIME 2 and others)
+colima start --cpu 4 --memory 8 --disk 100 --vm-type vz --vz-rosetta
+
+# Intel
+colima start --cpu 4 --memory 8 --disk 100
+```
+
+Check: `docker run --rm hello-world` prints "Hello from Docker!".
+Colima stops when the Mac restarts. Run `colima start` again (it keeps the settings),
+or start it at login with `brew services start colima`.
+
+**4. AmpliSentinel**
+
+Keep the clone inside your home folder: Colima shares it with the containers.
+
+```bash
+cd ~
+git clone https://github.com/tassid/amplisentinel.git
+cd amplisentinel
+conda env create -f environment.yml
+conda activate amplisentinel
 pip install -e ".[mcp]"
+```
+
+Check: `amplisentinel --version` prints the version.
+Every new Terminal needs `conda activate amplisentinel` before using the command.
+
+**5. Google Drive** (only for `inventory --drive`, fetching from Drive, and `publish`)
+
+```bash
+rclone config
+```
+
+- Create a remote of type `drive` with scope `drive.readonly` (read only), for
+  example named `gdrive`. Sign in when the browser opens. Then each run in
+  `config/runs.yaml` can point to its folder: `drive_path: "gdrive:<folder>/P1"`.
+- For `publish`, create a second remote named exactly `gdrive_rw` with scope
+  `drive.file` (writes only files that rclone created).
+
+Check: `rclone lsd gdrive:` lists your top folders.
+
+**6. First run** (only reads ENA, downloads nothing)
+
+```bash
+cd ~/amplisentinel
+export AMPLISENTINEL_WORKSPACE=workspaces/cervical-cancer
+amplisentinel init        # registers the runs of config/runs.yaml
+amplisentinel inventory   # accession lists x ENA metadata
+amplisentinel ui          # opens the dashboard at http://127.0.0.1:8800/
+```
+
+Before `fetch` and `run` work, the researcher fills in:
+
+| Where | What | Needed by |
+|---|---|---|
+| `config/runs.yaml` | `region`, `primers.forward`, `primers.reverse` of each run | `run` |
+| `config/runs.yaml` | `drive_path` of each run | `inventory --drive`, `fetch` from Drive |
+| `config/rules.yaml` | thresholds (optional; empty means raw numbers only) | `measure` |
+| `amplisentinel.yaml` | `run.qiime2_image` pinned by digest (`...@sha256:...`) | `run --denoiser deblur`, `merge` |
+| `amplisentinel.yaml` | `merge.silva_classifier` and `merge.silva_md5` | `merge` |
+
+Every command refuses, without changing any state, while something it needs is missing,
+and prints what is missing.
+
+**Update**
+
+```bash
+cd ~/amplisentinel && git pull && conda activate amplisentinel && pip install -e ".[mcp]"
+```
+
+**Common problems**
+
+| Message | Cause and fix |
+|---|---|
+| `command not found: amplisentinel` | environment not active: `conda activate amplisentinel` |
+| `Cannot connect to the Docker daemon` | Colima stopped: `colima start` |
+| `command not found: brew` (Apple Silicon) | step 1 PATH lines were not run; run them and reopen the Terminal |
+| `receptor weblog não iniciado` | port 8765 in use; set another in `amplisentinel.yaml` (`run.weblog_port`) |
+| dashboard port in use | `amplisentinel ui --port 8801` |
+
+### Linux
+
+Same steps as macOS from step 4, with the tools installed by the distribution:
+[Docker Engine](https://docs.docker.com/engine/install/) (add your user to the
+`docker` group), Java 17 or later, [Nextflow](https://www.nextflow.io/docs/latest/install.html),
+[rclone](https://rclone.org/install/) and [Miniforge](https://github.com/conda-forge/miniforge).
+No Colima needed.
+
+### Windows
+
+Nextflow does not run natively on Windows. Use WSL2 with Ubuntu and Docker Desktop
+(WSL integration on), then follow the Linux steps inside Ubuntu. Not tested yet.
+
+## Commands
+
+```bash
 export AMPLISENTINEL_WORKSPACE=workspaces/cervical-cancer   # or: amplisentinel -w <path> ...
 amplisentinel init            # registers runs from config/runs.yaml
 amplisentinel inventory       # data/accessions/*_runs.txt × ENA → .amplisentinel/inventory/
@@ -104,8 +243,7 @@ amplisentinel new ~/pesquisa/rice --name rice --title "Rice microbiome"
 ## Browser dashboard
 
 ```bash
-pipx install git+https://github.com/tassid/amplisentinel.git   # or: pip install -e .
-amplisentinel -w workspaces/cervical-cancer ui                 # opens http://127.0.0.1:8800/
+amplisentinel -w workspaces/cervical-cancer ui      # opens http://127.0.0.1:8800/
 ```
 
 - Runs on the same computer as the pipeline (macOS, Linux or Windows). Listens on
