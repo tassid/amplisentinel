@@ -27,6 +27,7 @@ from . import (
     ml,
     publish,
     reconcile,
+    serve_all,
 )
 from . import inventory as inv
 from . import queries as q
@@ -173,6 +174,11 @@ def cmd_show(args) -> int:
         "inventory": lambda: q.inventory(ws, args.arg),
         "ledger": lambda: q.ledger_tail(ws, int(args.arg or 20)),
         "errors": lambda: q.errors(ws, args.arg),
+        "reconciliation": lambda: q.reconciliation(ws, args.arg),
+        "fetch-manifest": lambda: q.fetch_manifest(ws, args.arg),
+        "process-events": lambda: q.process_events(ws, args.arg),
+        "between": lambda: q.between_metrics(ws),
+        "folds": lambda: q.folds(ws),
     }[args.what]
     try:
         print(json.dumps(fn(), indent=2, ensure_ascii=False))
@@ -186,6 +192,24 @@ def cmd_mcp(args) -> int:
     from .mcp_server import serve
 
     serve(_ws(args), http=args.http, host=args.host, port=args.port)
+    return 0
+
+
+def cmd_serve_all(args) -> int:
+    serve_all.serve_all(Path(args.config) if args.config else None)
+    return 0
+
+
+def cmd_launchd(args) -> int:
+    ws = _ws(args)
+    plist = serve_all.render_launchd_plist(ws, port=args.port, sentinel_bin=args.sentinel_bin)
+    if args.out:
+        out = Path(args.out)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(plist, encoding="utf-8")
+        print(f"plist salvo: {out}")
+    else:
+        print(plist, end="")
     return 0
 
 
@@ -465,7 +489,22 @@ def main(argv: list[str] | None = None) -> int:
     s.set_defaults(func=cmd_verify)
 
     s = sub.add_parser("show", help="mostra dados em JSON (o mesmo que o MCP devolve)")
-    s.add_argument("what", choices=["workspace", "run", "metrics", "inventory", "ledger", "errors"])
+    s.add_argument(
+        "what",
+        choices=[
+            "workspace",
+            "run",
+            "metrics",
+            "inventory",
+            "ledger",
+            "errors",
+            "reconciliation",
+            "fetch-manifest",
+            "process-events",
+            "between",
+            "folds",
+        ],
+    )
     s.add_argument("arg", nargs="?")
     s.set_defaults(func=cmd_show)
 
@@ -474,6 +513,16 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--host", default="127.0.0.1")
     s.add_argument("--port", type=int, default=8701)
     s.set_defaults(func=cmd_mcp)
+
+    s = sub.add_parser("serve-all", help="sobe um servidor MCP por workspace listado em ~/.sentinel/workspaces.yaml")
+    s.add_argument("--config", help="caminho alternativo para workspaces.yaml")
+    s.set_defaults(func=cmd_serve_all)
+
+    s = sub.add_parser("launchd", help="gera plist do launchd (macOS) para o servidor MCP do workspace")
+    s.add_argument("--port", type=int, default=8701)
+    s.add_argument("--sentinel-bin", default="sentinel")
+    s.add_argument("--out")
+    s.set_defaults(func=cmd_launchd)
 
     args = p.parse_args(argv)
     try:

@@ -36,6 +36,11 @@ Tools (all read only, all return the source file and its sha256):
 | `ledger_tail(n)` | last n ledger entries |
 | `ledger_verify` | hash chain check |
 | `errors(run?)` | error events, literally |
+| `reconciliation(run?)` | ENA x Drive reconciliation rows |
+| `fetch_manifest(run)` | verified FASTQ fetch manifest of one run |
+| `process_events(run)` | Nextflow weblog process events of one run |
+| `between_metrics` | between-project PERMANOVA metrics |
+| `folds` | deterministic LOPO ML folds |
 
 State changes (`move`) and decisions (`decide`) are not exposed. They stay in the CLI,
 typed by the researcher.
@@ -76,5 +81,7 @@ return data only.
 
 1. The OpenBot configuration steps above follow its README at the time of writing.
    Check `docs/configuration.md` in the OpenBot repository if a screen has moved.
-2. To start every server at login on macOS, a `launchd` agent per project works; a
-   template will be added later.
+2. To start every server at login on macOS, use `sentinel serve-all` reading
+   `~/.sentinel/workspaces.yaml` or generate a `launchd` agent plist per
+   project with `sentinel -w <workspace> launchd --port 8701` (template in
+   [docs/launchd/com.sentinel.mcp.plist](launchd/com.sentinel.mcp.plist)).
